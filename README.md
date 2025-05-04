@@ -14,11 +14,6 @@ With growing dependence on digital technology, it is essential to understand how
 We aim to merge and analyze data from both surveys to examine how different levels and forms of technology engagement relate to reported levels of psychological stress, anxiety, depression, and other indicators of mental health.
 
 
-## 📁 Repository Structure
-
-
-
-
 ## 👥 Contributors
 
 - **Sanjana Umesh Sawant**
@@ -26,8 +21,11 @@ We aim to merge and analyze data from both surveys to examine how different leve
 
 
 ## 📁 Repository Structure
-├───health_data
-│   └───raw
-└───health_eda
-    ├───variable_eda
-    └───variable_stats
+\---health_data
+|   \---processed
+|   \---raw
+|       \---NSDUH-2002-2019-DS0001-bndl-data-tsv
+\---health_eda
+|   \---variable_eda
+|   \---variable_stats
+\---tech_eda
