@@ -21,11 +21,13 @@ We aim to merge and analyze data from both surveys to examine how different leve
 
 
 ## 📁 Repository Structure
-\---health_data
-|   \---processed
-|   \---raw
-|       \---NSDUH-2002-2019-DS0001-bndl-data-tsv
-\---health_eda
-|   \---variable_eda
-|   \---variable_stats
-\---tech_eda
+```bash
+├───health_data
+│   ├───processed
+│   └───raw
+│       └───NSDUH-2002-2019-DS0001-bndl-data-tsv
+├───health_eda
+│   ├───variable_eda
+│   └───variable_stats
+└───tech_eda
+```
