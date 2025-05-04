@@ -1,0 +1,210 @@
+---
+title: "EDA NSDUH Data"
+---
+
+```{r warning=FALSE}
+# Import Libraries
+library(tidyverse)
+library(vroom)
+
+```
+
+## Data Load
+```{r}
+# PUF2021_121323 |> head(3)
+```
+
+```{r}
+dat <- read_tsv("../health_data/NSDUH_2019_Tab.txt")
+```
+
+The data is the survey result from about 67000 families in the year 2021. It has attributes pertaining to income, education, substance use and mental health. From the data we select the important attributes needed for our analysis.
+
+```{r}
+nrow(dat)
+```
+
+
+
+
+
+
+
+```{r}
+library(readr)
+library(dplyr)
+library(tibble)
+library(purrr)
+```
+
+## Data 2002-2019
+
+
+## Find Required Columns
+
+### Columns Analysis
+```{r}
+years <- 2002:2019
+column_summary <- list()
+
+for (year in years) {
+  print(year)
+  file_name <- paste0("../health_data/NSDUH_", year, "_Tab.txt")
+  
+  cols <- read_tsv(file_name, n_max = 0, col_types = cols()) |>  colnames()
+  column_summary[[as.character(year)]] <- cols
+  
+}
+```
+
+```{r}
+all_columns <- unique(unlist(column_summary))
+
+presence_matrix <- tibble(Variable_Name = all_columns)
+
+for (year in years) {
+  year_cols <- column_summary[[as.character(year)]]
+  presence_matrix[[as.character(year)]] <- ifelse(presence_matrix$Variable_Name %in% year_cols, 1, 0)
+}
+```
+
+
+```{r}
+# write_csv(presence_matrix, "presence_matrix.csv")
+```
+
+```{r}
+presence_matrix |> 
+  filter(Variable_Name=="ADDPREV")
+```
+
+
+### Codebook Analysis
+```{r warning=FALSE}
+# Load libraries
+library(pdftools)
+library(stringr)
+library(dplyr)
+library(tibble)
+```
+
+
+```{r}
+# Path to your PDF file
+pdf_path <- "../health_data/NSDUH-2002-2019-DS0001-info-codebook.pdf"
+
+# Extract text from PDF
+pdf_text_data <- pdf_text(pdf_path)
+
+# Initialize storage
+variables_list <- list()
+current_section <- NA
+
+# Regex patterns
+section_pattern <- "^[A-Z\\s]{4,}$"   # Lines with all CAPS indicating sections
+variable_pattern <- "^([A-Z0-9]+)\\s+Len\\s*:\\s*\\d+\\s*(.*)$"
+
+# Loop through each page
+for (page in pdf_text_data) {
+  lines <- str_split(page, "\n")[[1]]
+  
+  for (line in lines) {
+    line <- str_trim(line)
+    line <- str_squish(line)   # Normalize spaces
+    
+    # Check for section heading
+    if (str_detect(line, section_pattern) && nchar(line) > 3) {
+      current_section <- line
+    }
+    
+    if (str_detect(line, variable_pattern)) {
+      var_name <- str_match(line, variable_pattern)[,2]
+      description <- str_match(line, variable_pattern)[,3]
+      
+      variables_list[[length(variables_list) + 1]] <- tibble(
+        Variable_Name = var_name,
+        Description = description,
+        Section = current_section
+      )
+    }
+  }
+}
+
+# Combine all entries into a dataframe
+variables_df <- bind_rows(variables_list)
+
+# Remove duplicates if any
+variables_df <- distinct(variables_df)
+```
+
+```{r}
+variables_df |> 
+  head(5)
+```
+
+#### Find which cases have 1 at the end of the variable name
+```{r}
+variables_df_rem <-  variables_df |> 
+  mutate(Variable_Name=str_remove(Variable_Name,"\\d$"))
+
+## We created a tibble
+variables_df_all <- bind_rows(variables_df, variables_df_rem)
+
+variables_df_all <- unique(variables_df_all)
+  
+# This has both clovever and both clovever1 whichever matches
+variables_df_all |> 
+  filter(Variable_Name %in% c("CLOVEVER","CLOVEVER1"))
+```
+
+
+```{r}
+# View sample
+head(variables_df, 20)
+```
+
+```{r}
+# Save to CSV
+# write.csv(variables_df, "NSDUH_Variables_Extracted.csv", row.names = FALSE)
+```
+
+
+
+### Merge both
+```{r}
+# Presence of Variables
+presence_matrix |> head(2)
+```
+
+```{r}
+# Meaning of each
+variables_df |> head(2)
+```
+
+```{r}
+variable_sel <- left_join(presence_matrix, variables_df_all)
+variable_sel |> head(2)
+```
+
+```{r}
+# write_csv(variable_sel,"Variable_Description_1.csv")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

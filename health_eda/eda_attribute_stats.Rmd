@@ -1,0 +1,251 @@
+---
+title: "EDA Columns"
+author: "Anurag Mallick"
+date: "2025-04-28"
+output:
+  html_document:
+    toc: yes
+    toc_depth: '4'
+    df_print: paged
+fontsize: 12pt
+classoption: twoside
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Column Descriptions
+
+We have found certain columns so far which contain mental health attribute
+
+
+
+```{r}
+library(tidyverse)
+library(stringr)
+```
+
+
+### Function for Descriptive Stats
+
+```{r}
+# Function for descriptive statd
+compute_descriptive_stats <- function(filename, year) {
+  
+  data <- read_tsv(filename, col_types = cols(.default = "c"))  
+  
+  # Initialize a list to store stats
+  stats_list <- list()
+  
+  for (col in columns_of_interest) {
+    cat("\t Column\n",col)
+    if (col %in% colnames(data)) {
+      num_NA <- sum(is.na(data[[col]]))
+      count_1 <- sum(data[[col]] == "1", na.rm = TRUE)
+      
+      # Unique values (sorted)
+      unique_vals <- sort(unique(na.omit(data[[col]])))
+      unique_vals_str <- paste(unique_vals, collapse = ", ")
+      
+    } else {
+      num_NA <- NA
+      count_1 <- NA
+      unique_vals_str <- NA
+      message(paste("Column", col, "does not exist in year", year))
+    }
+    
+    stats_list[[col]] <- tibble(
+      Year = year,
+      Column = col,
+      Num_NA = num_NA,
+      Count_1 = count_1,
+      Unique_Values = unique_vals_str
+    )
+  }
+  
+  # Combine stats for this year
+  return(bind_rows(stats_list))
+}
+```
+
+
+## DEMOGRAPHICS
+
+```{r}
+demographics_cols <- c("YEAR","IRSEX","EDUCCAT2","IREDUC2","IIEDUC2","CATAGE","CATAG2","CATAG3","CATAG7")
+```
+
+```{r}
+# Define the years and columns of interest
+years <- 2002:2019
+# columns_of_interest <- c("ANXDYR", "DEPRSYR", "MDEDP2WK1","TRNEVER")
+columns_of_interest <- cols_check <- demographics_cols
+
+
+final_stats_demo <- tibble()
+
+for (year in years) {
+  cat("\nFor year", year,"\n")
+  file_name <- paste0("../health_data/NSDUH_", year, "_Tab.txt")
+  
+  final_stats_demo <- bind_rows(final_stats_demo, compute_descriptive_stats(file_name, year))
+}
+```
+
+The demographics attribute analyzed given below
+```{r}
+final_stats_demo |> head(5)
+```
+
+
+```{r}
+write_csv(final_stats_demo,"variable_stats/Demographic_Vars_2002-19.csv")
+```
+
+
+
+## PSYCHOLOGICAL DISTRESS
+```{r}
+psych_cols <- c("DSTNRVOS","DSTHOPLS","DSTRSTLS")
+```
+
+```{r}
+# Define the years and columns of interest
+years <- 2002:2008
+# columns_of_interest <- c("ANXDYR", "DEPRSYR", "MDEDP2WK1","TRNEVER")
+columns_of_interest <- cols_check <- psych_cols
+
+
+final_stats_psych_old <- tibble()
+
+for (year in years) {
+  cat("For year", year)
+  
+  file_name <- paste0("../health_data/NSDUH_", year, "_Tab.txt")
+  
+  final_stats_psych_old <- bind_rows(final_stats_psych_old, compute_descriptive_stats(file_name, year))
+}
+```
+
+
+```{r}
+final_stats_psych <- bind_rows(final_stats_psych_old, final_stats_psych)
+```
+
+
+```{r}
+write_csv(final_stats_psych,"variable_stats/Psych_Distress_Vars_2002-19.csv")
+```
+
+
+
+
+
+
+
+
+
+## INCOME
+
+```{r}
+income_cols <- c("IRPINC3","IRFAMIN3","IIPINC3","IIFAMIN3","GOVTPROG","INCOME")
+```
+
+```{r}
+# Define the years and columns of interest
+years <- 2002:2019
+# columns_of_interest <- c("ANXDYR", "DEPRSYR", "MDEDP2WK1","TRNEVER")
+columns_of_interest <- cols_check <- income_cols
+
+
+final_stats_income <- tibble()
+
+for (year in years) {
+  cat("\nFor year", year,"\n")
+  file_name <- paste0("../health_data/NSDUH_", year, "_Tab.txt")
+  
+  final_stats_income <- bind_rows(final_stats_income, compute_descriptive_stats(file_name, year))
+}
+```
+
+```{r}
+write_csv(final_stats_income,"variable_stats/Income_Vars_2002-19.csv")
+```
+
+
+
+## EDUCATION
+
+```{r}
+edu_cols <- c("LFTSCHA2","LFSCHWH2")
+```
+
+```{r}
+# Define the years and columns of interest
+years <- 2002:2019
+# columns_of_interest <- c("ANXDYR", "DEPRSYR", "MDEDP2WK1","TRNEVER")
+columns_of_interest <- cols_check <- edu_cols
+
+
+final_stats_edu <- tibble()
+
+for (year in years) {
+  cat("\nFor year", year, "\n")
+  file_name <- paste0("../health_data/NSDUH_", year, "_Tab.txt")
+  
+  final_stats_edu <- bind_rows(final_stats_edu, compute_descriptive_stats(file_name, year))
+}
+```
+
+
+```{r}
+write_csv(final_stats_edu,"variable_stats/Education_Vars_2002-19.csv")
+```
+
+
+
+## ADULT MENTAL HEALTH
+
+```{r}
+mental_health_cols <- c("PANATAK", "MDEDP2WK", "MDELOSIN","MNCHYPER","PHBCRWDS","PHBPUBPL","PHBTRAVL","PHBAWYHM","PTSEVER","MHHOSPOV","MHMEDS","MHOPNUM2","PANATKN2","MDEDPWKR","MDELIWK2","GADWKS2","PTSWKS2","MHMEDWK2","IMPWKS2")
+```
+
+
+```{r}
+# Define the years and columns of interest
+years <- 2009:2019
+# columns_of_interest <- c("ANXDYR", "DEPRSYR", "MDEDP2WK1","TRNEVER")
+columns_of_interest <- cols_check <- mental_health_cols
+
+
+final_stats_mhealth <- tibble()
+
+for (year in years) {
+  cat("For year", year)
+  file_name <- paste0("../health_data/NSDUH_", year, "_Tab.txt")
+  
+  final_stats_mhealth <- bind_rows(final_stats_mhealth, compute_descriptive_stats(file_name, year))
+}
+```
+
+
+```{r}
+final_stats_mhealth <- bind_rows(final_stats_mhealth_old, final_stats_mhealth)
+```
+
+
+```{r}
+write_csv(final_stats_mhealth,"variable_stats/Mental_Health_Vars_2002-19.csv")
+```
+
+
+
+
+## Combine and look at all
+```{r}
+final_stats_edu
+```
+
+
+
