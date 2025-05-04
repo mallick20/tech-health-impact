@@ -2,3 +2,7 @@
 .Rhistory
 .RData
 .Ruserdata
+
+health_data/*
+
+!health_data/README.md
