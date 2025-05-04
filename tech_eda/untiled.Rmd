@@ -1,0 +1,86 @@
+---
+title: "Untitled"
+author: "Sanjana Umesh Sawant"
+date: "2025-04-22"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(scales)
+years <- c(1998, 2000, 2001, 2003, 2007, 2009, 
+           2010, 2011, 2012, 2013, 2015, 2017, 2019, 2021, 2023)
+# Load libraries
+library(dplyr)
+library(readr)
+library(purrr)
+
+file_names <- paste0("cps_", years, ".csv")
+
+
+selected_vars_by_year <- list(
+  "1998-2004" = c("pescu1", "pescu6a", "pescu6b", "pescu6c", "pescu6d", "pescu6e", "pescu6f", "pescu6g", "pescu6h",
+                  "pescu6i", "pescu6j", "pescu6k", "pescu6l", "pescu6m", "pescu6n", "pescu7",
+                  "pescu9a", "pescu9b", "pescu9c", "pescu9d", "pescu9e", "pescu9f", "pescu9g", "pescu9h",
+                  "pescu9i", "pescu9j", "pescu9k", "pescu9l", "pescu9m", "pescu9n", "pescu9o",
+                  "pescu10", "pescu11", "pescu12", "pescu13", "pescus", "peschcu1", "peschcu3"),
+
+  "2005-2010" = c("peinhome", "peinetloc", "penetuse", "net8", "net9", "net10", "net11"),
+
+  "2011-2015" = c("penet1", "penet1a1", "penet1a2", "penet1a3", "penet1a4", "penet1a5",
+                  "penet1a6", "penet1a7", "penet1a8", "penet1a9", "penet1a10", "pemphone",
+                  "peinhome", "peinetloc", "pesneta"),
+
+  "2016-2023" = c("pesneta", "pesnetb", "pesnetc", "pesnetf", "petablet", "pewearab",
+                  "hewearab", "petabl", "tablet", "pelaptop", "pedesktp")
+)
+get_vars_for_year <- function(year) {
+  if (year >= 1998 && year <= 2004) return(selected_vars_by_year[["1998-2004"]])
+  if (year >= 2005 && year <= 2010) return(selected_vars_by_year[["2005-2010"]])
+  if (year >= 2011 && year <= 2015) return(selected_vars_by_year[["2011-2015"]])
+  if (year >= 2016 && year <= 2023) return(selected_vars_by_year[["2016-2023"]])
+  return(character(0))
+}
+
+# Function to load, standardize, and clean each file
+process_yearly_data <- function(file, year) {
+  df <- read_csv(file, show_col_types = FALSE)
+
+  # Step 3: Keep only rows where at least one usage variable is not NA
+  selected_vars <- c("hryear4", get_vars_for_year(year))
+  existing_vars <- intersect(selected_vars, names(df))
+
+  # Make sure 'hryear4' is added manually if needed
+  if (!"hryear4" %in% existing_vars && "hryear" %in% names(df)) {
+    df <- df %>%
+      mutate(hryear4 = case_when(
+        hryear == 94 ~ 1994,
+        hryear == 97 ~ 1997,
+        TRUE ~ NA_integer_
+      ))
+    existing_vars <- c("hryear4", intersect(get_vars_for_year(year), names(df)))
+  }
+
+  # Now filter based on *usage* variables (exclude year column)
+  usage_cols <- setdiff(existing_vars, "hryear4")
+
+  if (length(usage_cols) > 0) {
+    df <- df %>% filter(rowSums(!is.na(select(., all_of(usage_cols)))) > 0)
+  }
+
+  # Then select only the existing vars
+  df <- df %>% select(any_of(existing_vars))
+
+}
+
+# Process all datasets and combine
+cps_data_cleaned <- map2_dfr(file_names, years, process_yearly_data)
+
+# View summary
+glimpse(cps_data_cleaned)
+
+write_csv(cps_data_cleaned, "cps_tech_use_cleaned.csv")
+```
