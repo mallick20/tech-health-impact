@@ -2,7 +2,10 @@
 .Rhistory
 .RData
 .Ruserdata
+.Rdata
+.httr-oauth
+.DS_Store
+.quarto
 
 health_data/*
-
 !health_data/README.md
