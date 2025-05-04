@@ -1,0 +1,39 @@
+---
+title: "EDA NSDUH Data"
+output: html_notebook
+---
+
+```{r warning=FALSE}
+# Import Libraries
+library(tidyverse)
+
+```
+
+## Data Load
+```{r}
+# PUF2021_121323 |> head(3)
+```
+
+```{r}
+dat <- read_tsv("../health_data/NSDUH_2021_Tab.txt")
+```
+
+The data is the survey result from about 67000 families in the year 2021. It has attributes pertaining to income, education, substance use and mental health. From the data we select the important attributes needed for our analysis.
+
+## Important Attributes
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
