@@ -37,4 +37,3 @@ The data is the survey result from about 67000 families in the year 2021. It has
 
 
 
-
