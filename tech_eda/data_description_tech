@@ -1,0 +1,388 @@
+2001 Data
+
+Technology/Device Use Variables
+
+HESC1: Is there a computer or laptop in the household? (Yes/No)
+HESC2: Number of computers or laptops in the household (1, 2, or 3+)
+HESC3: Year the newest computer was obtained
+HESC4: Ownership of the newest computer (household member/other)
+HESINT1: Anyone in household connects to the Internet from home (Yes/No)
+HESINT2A: How they connect to the Internet (dial-up, DSL, cable modem, other)
+HESINT41–HESINT44: Whether other internet-access devices (cellular phone/pager, PDA/handheld, TV-based device, other) are present
+
+Internet Use (Home vs. Outside)
+
+PRNET2: Internet use at home recode (Yes/No)
+PRNET3: Internet use outside the home recode (Yes/No)
+PRNET1: Internet use anywhere recode (Yes/No)
+PESNETSW, PESNETSX, PESNETSY, PESNETSZ: Internet use at public libraries, community centers, someone else’s house, other places
+
+Activities on Internet
+
+SNETA: Used Internet to complete school assignments
+SNETB: Used Internet for email or instant messaging
+SNETC: Used Internet for chat rooms or LISTSERVs
+SNETD: Used Internet for playing games
+SNETE: Used Internet for online courses
+SNETF–SNETQ: Used Internet for activities like shopping, banking, news, stock trading, job searching, telephoning
+
+Computer Use (General and Gaming)
+
+PESCH: Uses a computer at home (Yes/No)
+PESCHW: Uses home computer for work at home
+SCh5: Uses home computer for school assignments
+Sch6: Uses home computer to manage household records/finances
+SCh7: Plays games on the home computer (Yes/No)
+
+Parental Concerns Related to Children
+
+HESCON2: Compared to TV, concern about material children may be exposed to on the Internet (more concerned/less/about the same)
+HESINT5A:Main reason no Internet at home (includes option "Concerned about how children use it")
+
+2003 Data
+
+Technology and Internet Use Attributes:
+
+HESC1	Is there a computer or laptop in the household?
+HESINT2A	Type of internet access used (e.g., dial-up, DSL, cable, mobile, satellite, etc.)
+HESEVR	Has anyone in the household ever connected to the internet from home?
+HESINT5A	Main reason for not having internet at home (e.g., too expensive, privacy/security concerns, concern about children accessing inappropriate sites)
+PESCH	Person uses a computer at home?	Yes/No
+PESCHW	Person uses home computer for work at home?
+PESCH2	Person connects to the internet at home (for personal use)?
+PESCH2NA	Main device used to access internet at home (desktop, laptop, TV device, mobile, handheld device, game machine)
+PRNET2	Uses internet at home (recode)
+PRNET3	Uses internet outside home (recode)	
+PRNET1	Uses internet anywhere (recode)
+SCh7	Plays games on the computer without connecting to the internet
+SNETD	Used the internet this year to play games
+SNETB	Used the internet this year for email or instant messaging
+SNETI	Used internet for listening to radio or viewing TV/movies
+PESCH5	Used home computer for completing school assignments
+PESCH6	Used home computer for managing household records/finances
+SCh5	At home, used computer to complete school assignments
+SCh6	Used computer at home to manage household records or finances
+
+Parental Concern Attributes:
+
+Variable Name	Description	How Recorded
+HESCON2	How concerned compared to TV material about what children are exposed to on the internet (more concerned, less concerned, about the same)
+HESINT5A (sub-category)	Reason for not having internet at home: “Concern that children will access inappropriate sites”	Selected reason
+
+Other Communications/Entertainment Media Attributes:
+
+Variable Name	Description	How Recorded
+SINT6	Media used at home: Telephone, Cellular Phone, Pager, Satellite TV, Cable TV, PDA	"Mark all that apply"
+HESINT6F	Household uses a Personal Digital Assistant (PDA)
+
+2007 Data
+
+Technology, Internet, Device Use Variables
+
+HENET1	Whether anyone in the household uses the Internet at any location
+PENET2	Whether this individual uses the Internet at any location (person-level recode of HENET2)
+HENET3	Whether anyone connects to the Internet from home
+HENET4	Type of internet connection used at home (dial-up vs. broadband etc.)
+
+Location of Internet Use (Home vs Outside)
+
+HENET3 specifically captures internet use from home
+PENET2 is general, meaning it captures internet use at any location — home, work, school, library, etc.
+
+2009 Data
+
+Basic Internet Use (Household and Individual Level)
+NET1: (Do you/Does anyone in this household) use the Internet at any location?
+PENET2: Who is that? (Person-level identification of Internet users in the household)
+HENET3: (Do you/Does anyone in this household) connect to the Internet from home?
+
+Type of Internet Connection (At Home)
+HENET4: Do you currently access the Internet at home using
+
+If No Broadband at Home, Reason Why
+HENET5: Main reason for not having high-speed (faster than dial-up) Internet at home
+
+2011 Data
+
+Relevant Attributes / Covariates:
+
+PESCI1	Does the person use a cellular phone or smartphone?
+PESC2A6	On smartphone: Do you play games?
+PELAPT	Do you use a laptop/netbook to access the Internet?
+PETABL	Do you use a tablet/ebook reader to access the Internet?
+PEGAME	Do you use a game console (Wii, Xbox, Playstation) to access the Internet?
+PETVBA	Do you use a TV-based Internet device (Apple TV, Roku)?
+PEHOME	Does the person access the Internet from home?
+PEWRKA	Does the person access the Internet from work?
+PESCHL	Does the person access the Internet at school?
+PELIBA	Does the person access the Internet at a library?
+PEOTHA	Does the person access the Internet at some other location?
+PEPRIM1	Frequency of Internet access over the past year (every day, weekly, monthly, etc.)
+PTPRIM2	Hours of usual Internet use (per day/week/month)
+PEPR3A2	Relies on Internet for entertainment (games, videos, music)
+PEPRIM6	Use of Internet for government services (e.g., tax forms)
+PEPRIM7	Use of Internet for job search
+PEPRIM8	Use of Internet for job training or courses
+PEPRIM9	Use of Internet for health plan/practitioner research
+PEPRIM10	Use of Internet for self-diagnosis/treatment information
+PEPRIM11	Use of Internet for accessing medical records or telehealth services
+PEPRIM12	Concern about providing personal information online vs. by telephone
+
+Child Internet Safety Attributes:
+
+PEPRM141	Use of "nanny" (blocking/filtering) software
+PEPRM142	Monitoring child browsing history/email
+PEPRM143	Prohibiting children from using Internet entirely
+PEPRM144	Prohibiting Internet use in private locations
+PEPRM145	Allowing Internet use only under direct adult supervision
+PEPRM146	Setting rules/guidelines for unsupervised use
+PEPRM147	Other child safety methods used
+
+2013 Data
+
+Device and Internet Access Usage
+
+HESCI1: Household use of cellular phones or smartphones
+HENET2: Household use of desktop, laptop, netbook, notebook, or tablet computers at home
+HENET3: Household internet access from home
+PEDESK: Personal use of desktop computer to access the internet
+PELAPT: Use of laptop or netbook to access the internet
+PETABL: Use of tablet or e-book reader to access the internet
+PECELL: Use of cellular phone or smartphone to access the internet
+PEGAME: Use of game system/console (e.g., Wii, Xbox, PlayStation) to access the internet
+PETVBA: Use of TV-based device (e.g., Apple TV, Roku) to access the internet
+
+Internet Use Frequency and Duration
+
+PEPRIM1: Frequency of internet use over the past year (Every day, More than once a week, Once a week, Once a month, Less than once a month, Never)
+PTPRIM2: Hours spent using the internet per (day/week/month)
+
+Internet Use Activities
+
+PEPRM31: Use of the internet for music
+PEPRM32: Use of the internet for games
+PEPRM33: Use of the internet for videos
+PEPRM34: Use of the internet for video calls or conferencing
+
+Parental Concerns and Actions Regarding Children's Internet Use
+
+PEPRM141: Use of blocking/filtering software ("Nanny" software)
+PEPRM142: Monitoring browsing history and email
+PEPRM143: Prohibiting children from using the internet entirely
+PEPRM144: Prohibiting internet use in private locations
+PEPRM145: Allowing use only with direct adult supervision
+PEPRM146: Setting rules and guidelines for unsupervised internet use
+
+2015 Data
+
+Device and Technology Use
+
+DESKTP / LAPTOP / TABLET / HEMPONE: Use of desktop computers, laptops/notebooks, tablets/e-book readers, and smartphones/cell phones.
+HELAPTOP / HETABLET / HEMPHOME: Further specifies who in the household uses these devices
+
+Internet Use (Location and Type)
+
+HEINHOME / PEINHOME: Internet use at home (Household-level and person-level).
+PEINWORK: Internet use at work (person-level).
+PEEMAIL, PETEXTIM, PETELEWK: Randomly selected person's use of Email, Texting/Instant Messaging, Telecommuting online
+HEHOMFAC: Most important factor regarding home Internet service (speed, reliability, affordability, etc.)
+HEBUNDLE: Internet bundled with other services like TV, mobile, etc.
+OUTMOB: Internet access via mobile Internet service/data plan outside home
+HEEVROUT, PEINCAFE, PEINSCHL, PEINOTHR: Internet usage at different external locations: cafés, schools, libraries, etc.
+
+Gaming and Entertainment
+
+PEGAMES: (For the randomly selected respondent): Whether they play games online using the Internet:
+PEVIDEO: Streaming or downloading video content (movies, shows, etc.)
+
+Parental Concerns (Children's Internet Use and Gaming)
+
+PECYBULY: Randomly selected person's experience of cyberbullying or online harassment
+HECBULLY: Household-level: Anyone in the household experiencing online harassment/cyberbullying
+PEPRIVACY, HEPSPRE1: Concerns about online privacy and security affecting internet behavior
+
+No or Limited Internet Use (Reasons)
+
+HENOHM1-HENOHM11: Reasons for no Internet use at home (e.g., affordability, privacy concerns, no devices, etc.)
+HENOOU1-HENOOU11: Reasons for no Internet use outside home (e.g., safety concerns, no devices, affordability)
+
+2017 Data
+
+Technology Use (Devices)
+
+DESKTP: Use of desktop computers
+LAPTOP: Use of laptops or notebooks
+TABLET: Use of tablets or e-book reader
+HEMPHONE / PEMPONE: Use of smartphones or cell phones
+HEWEARAB / PEWEARAB: Use of wearable internet devices (e.g., smartwatches, fitness bands)
+HETVBOX / PETVBOX: Use of smart TVs or TV-connected devices (Xbox, Apple TV, Roku, PlayStation, Blu-ray players)
+
+Internet Use (Location)
+
+INHOME / PEINHOME: Use of the internet at home
+INWORK / PEINWORK: Use of the internet at work
+INSCHL / PEINSCHL: Use of the internet at school
+INCAFE: Use of the internet at coffee shops or businesses offering Wi-Fi
+INTRAV / INLICO / INELHO / INOTHR: Use at other locations such as during travel, libraries, other people’s homes.
+
+Time Spent Online / Activities
+
+EMAIL: Use of email
+TEXTIM: Texting or instant messaging
+SOCIAL: Use of social networks (Facebook, Twitter, Instagram)
+CONFER: Video or voice conferencing (Skype, FaceTime)
+VIDEO: Streaming or watching videos (YouTube, Netflix)
+AUDIO: Streaming or downloading music, radio, or podcasts
+PUBLISH: Posting/uploading original blogs, videos
+
+Parental Concerns / Child Use / Privacy Concerns
+
+HEPSPRE1–HEPSPRE5: Privacy or security concerns stopping online activities (e.g., banking, shopping, posting on social media)
+HECBULLY: Household member experienced online harassment, stalking, or cyberbullying
+HEPSCON1–HEPSCON3: Top concerns about online privacy — identity theft, credit card fraud, data collection
+
+Internet Service at Home
+
+HEINHOME: Use of internet at home
+HEHOMSU: Who provides internet service
+HEPSENSI: Would household buy home internet if cheaper
+
+Access and Challenges with Technology
+
+NOHM, PRINOH, PRNOHS: Reasons for not having internet at home (e.g., cost, privacy concerns)
+EVROUT / NOOU / PRINOO / NOOUS: Reasons for not using internet outside home
+
+2019 Data
+
+Device Use
+Desktop Computer: DESKTP 
+Laptop or Notebook Computer: LAPTOP
+Tablet or E-book Reader (e.g., iPad, Kindle): TABLET
+Smartphone (Internet-capable): MPHONE
+Wearable Device (e.g., smartwatch, fitness band): WEARAB 
+Smart TV / Game Console / TV-Connected Device (e.g., Xbox, Apple TV, Roku): TVBOX
+
+Internet Use
+
+Internet Use at Home: INHOME
+Internet Use at Work: INWORK
+Internet Use at School: INSCHL
+Internet Use in Public Places (e.g., cafés, libraries): INCAFE, INLICO, INTRAV, INELHO, INOTHR
+
+Activities and Time Spent Online
+
+Email Use: EMAIL
+Texting or Instant Messaging: TEXTIM
+Social Networking (e.g., Facebook, Twitter): SOCIAL
+Video or Voice Conferencing (e.g., Skype, FaceTime): CONFER
+Streaming/Watching Videos: VIDEO
+Streaming/Downloading Music, Radio, Podcasts: AUDIO
+Publishing/Uploading Blogs, Videos, Content: PUBLISH
+Telecommuting (Working Remotely Using Internet): TELEWK
+Using Internet to Search or Apply for Jobs: JOBSCH
+
+Parental Concerns about Children’s Tech Use
+
+Cyberbullying/Online Harassment: HECBULLY
+Privacy/Security Concerns Preventing Online Activities (e.g., banking, purchases): HEPSPRE1
+Concerns About Online Privacy/Cybersecurity (Outside Home): HENOOU7
+Concerns About Personal Safety (Outside Home Internet Use): HENOOU8
+
+Gaming and Entertainment via Devices
+
+Use of TV-connected Devices (such as game systems): TVBOX, and HETVBOX
+
+2021 Data
+
+Device Use Variables
+
+DESKTP: Use of a desktop computer
+LAPTOP: Use of a laptop computer
+TABLET: Use of a tablet or e-reader (iPad, Kindle, etc.)
+MPHONE: Use of a smartphone or Internet-connected cellphone
+WEARAB: Use of wearable Internet devices (e.g., smartwatch, fitness band)
+TVBOX: Use of smart TV, game system, or TV-connected device 
+
+Internet Use Variables (Location)
+
+INHOME: Use of internet at home
+INWORK: Use of internet at work
+INSCHL: Use of internet at school
+INCAFE: Use of internet at cafes
+INTRAV: Use of internet while traveling
+
+Internet Activities Variables (Random Respondent, 15+ Years Old)
+
+EMAIL: Use of email
+TEXTIM: Use of texting or instant messaging
+SOCIAL: Use of social networks (Facebook, Instagram, etc.)
+GAMING: Playing video games online on any device
+CONFER: Participation in online video/voice calls (Zoom, Skype, etc.)
+VIDEO: Streaming or downloading videos (YouTube, Netflix)
+AUDIO: Streaming or downloading music, radio, or podcasts
+PUBLSH: Posting/uploading original content (not photos) to the internet
+
+Internet Service at Home
+
+HOMTE1: Access via high-speed internet (cable/DSL/fiber)
+HOMTE2: Access via satellite internet
+HOMTE3: Access via dial-up service
+HOMTE4: Some other service
+HNETQL: Household satisfaction with internet speed, reliability, and data caps
+HNETST: Temporary loss of internet due to nonpayment
+
+Concerns About Internet and Technology Use
+
+PSCON: Privacy and security concerns online (identity theft, fraud, tracking, harassment, etc.)
+PSCYBA: Experience with online security breach or identity theft
+
+Device Functionality and Access Issues
+DEVQUA: Overall device functionality quality rating (from "does not work at all" to "works perfectly")
+DEVSTA: Frequency device was inaccessible (someone else using it, etc.)
+
+Parent Concerns about Children's Internet or Game Use
+
+Indirectly covered through:
+INHOME: Tracking children using internet at home
+GAMING: Children playing games online
+PSCON: Concerns like online safety (harassment, cyberbullying)
+
+2023 Data
+
+Device Use Variables (Any Location)
+
+Household-level questions on whether anyone uses:
+Laptop Computer (LAPTOP)
+Desktop Computer (DESKTP)
+Tablet or e-Book Reader (TABLET)
+Smartphone or Internet-connected Cellphone (MPHONE)
+Wearable Device like a smart watch or fitness band (WEARAB)
+Smart TV / Game Console / TV-connected Device like Xbox, Roku, Apple TV (TVBOX)
+
+Internet Activities (Randomly Selected Person)
+
+For one randomly selected person aged 15+ who used the internet, detailed questions included whether they:
+Used email (EMAIL)
+Texted or used instant messaging (TEXTIM)
+Used social networks (Facebook, Instagram, etc.) (SOCIAL)
+Played video games online on any device (GAMING)
+Participated in video or voice calls or conferencing (Zoom, FaceTime) (CONFER)
+Streamed or downloaded videos (YouTube, Netflix) (VIDEO)
+Streamed or downloaded music, podcasts, radio (AUDIO)
+Published/uploaded original content like blog posts or original videos (PUBLSH)
+Teleworked using the Internet (TELEWK)
+
+Internet Access (Home and Other Locations)
+
+Households were asked about:
+How the internet is accessed at home (high-speed, satellite, mobile data, other) (HOMTE, TEOTHR)
+Satisfaction with home internet connection (speed, reliability, data caps) (HNETQL)
+Internet disconnection due to payment difficulties (HNETST)
+If no home internet, additional questions asked why they don't have internet (cost, lack of interest, device issues, privacy concerns, etc.) (NOHM)
+
+Parental Concerns About Children's Internet Use
+
+If children were using the Internet, households were asked about concerns regarding children's internet or gaming use, including:
+Concerns about online privacy/security (PSCON): identity theft, fraud, tracking, cyberbullying, etc.
+Experience of security breaches or identity theft (PSCYBA)
+
