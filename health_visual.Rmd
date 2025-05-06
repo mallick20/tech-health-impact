@@ -55,7 +55,6 @@ Nervousness number 1,2,3,4 shows different level of nervousness for the past 12 
 4 = A little of the time 
 
 ### Overall for different years
-
 ```{r fig.width=10}
 psych_summ_all_grp_ovrl |>
   filter(CATAG7>=4) |> 
@@ -107,7 +106,6 @@ psych_summ_all_grp_ovrl |>
 
 
 ### Different Age Groups
-
 ```{r fig.width=10}
 psych_summ_all_grp_ovrl |>
   filter(CATAG7>=4) |>
@@ -129,32 +127,136 @@ psych_summ_all_grp_ovrl |>
 ```
 
 
-
+### Different Income Groups
+```{r fig.width=10}
+psych_summ_all_grp_ovrl |>
+  filter(CATAG7>=4) |>
+  select(-c(IRSEX, CATAG7, EDUCCAT2)) |> 
+  group_by(YEAR, INCOME) |> 
+  summarize(across(where(is.numeric), sum, na.rm = TRUE)) |> 
+  ungroup() |> 
+  mutate(Nervous_1_percent=Nervous_1/num_people,
+         Nervous_any_percent=Nervous_any/num_people) |> 
+  pivot_longer(cols=c(Nervous_1_percent, Nervous_any_percent),
+               values_to = "Nervous_Values", names_to = "Nervous_type") |> 
+  ggplot(mapping=aes(x=YEAR, y=Nervous_Values, color = as.factor(INCOME), group = as.factor(INCOME))) +
+  geom_line(size=1.5)+
+  xlab("Year") +
+  ylab("% Nervous") +
+  ggtitle("Percentage Nervous by income") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  facet_wrap(~Nervous_type)
+```
 
 
 
 
 ## Hopelessness
 
-```{r}
-psych_summ_ovrl |> 
+### Overall for different years
+```{r fig.width=10}
+psych_summ_all_grp_ovrl |>
+  filter(CATAG7>=4) |> 
+  select(-c(IRSEX, CATAG7,INCOME, EDUCCAT2)) |> 
+  group_by(YEAR) |> 
+  summarize(across(where(is.numeric), sum, na.rm = TRUE)) |> 
+  ungroup() |> 
   mutate(Hopeless_123_percent=(Hopeless_1+Hopeless_2+Hopeless_3)/num_people,
          Hopeless_1_percent=Hopeless_1/num_people,
+         Hopeless_12_percent=(Hopeless_1+Hopeless_2)/num_people,
          Hopeless_any_percent=Hopeless_any/num_people) |> 
-  pivot_longer(cols=c(Hopeless_123_percent,Hopeless_1_percent, Hopeless_any_percent), values_to = "Hopeless_Values", names_to = "Hopeless_type") |> 
+  pivot_longer(cols=c(Hopeless_1_percent, Hopeless_12_percent, Hopeless_123_percent,Hopeless_any_percent), 
+               values_to = "Hopeless_Values", names_to = "Hopeless_type") |> 
   ggplot(mapping=aes(x=YEAR, y=Hopeless_Values, color = Hopeless_type)) +
-  geom_line(size=1.5)
+  geom_line(size=1.5)+
+  xlab("Year") +
+  ylab("% Hopeless") +
+  ggtitle("Percentage Hopeless for different years") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_color_manual(
+      values = c("Hopeless_1_percent" = "brown","Hopeless_12_percent" = "maroon","Hopeless_123_percent" = "orange", 
+                 "Hopeless_any_percent" = "red"),
+      labels = c("All Times", "All or Most Times", "Little Time", "Atleast one time"),name = "Hopeless Category")
 ```
+
+
 
 ### Different Age Groups
-
-```{r}
-psych_summ_age_ovrl |> 
-  mutate(Hopeless_123_percent=(Hopeless_1+Hopeless_2+Hopeless_3)/num_people,
-         Hopeless_1_percent=Hopeless_1/num_people,
+```{r fig.width=10}
+psych_summ_all_grp_ovrl |>
+  filter(CATAG7>=4) |>
+  select(-c(IRSEX,INCOME, EDUCCAT2)) |> 
+  group_by(YEAR, CATAG7) |> 
+  summarize(across(where(is.numeric), sum, na.rm = TRUE)) |> 
+  ungroup() |> 
+  mutate(Hopeless_1_percent=Hopeless_1/num_people,
          Hopeless_any_percent=Hopeless_any/num_people) |> 
-  pivot_longer(cols=c(Hopeless_123_percent,Hopeless_1_percent, Hopeless_any_percent), values_to = "Hopeless_Values", names_to = "Hopeless_type") |> 
-  ggplot(mapping=aes(x=YEAR, y=Hopeless_Values,  group = CATAG7, color=CATAG7)) +
+  pivot_longer(cols=c(Hopeless_1_percent, Hopeless_any_percent),
+               values_to = "Hopeless_Values", names_to = "Hopeless_type") |> 
+  ggplot(mapping=aes(x=YEAR, y=Hopeless_Values, color = as.factor(CATAG7), group = as.factor(CATAG7))) +
   geom_line(size=1.5)+
-  facet_wrap(~ Hopeless_type)
+  xlab("Year") +
+  ylab("% Hopeless") +
+  ggtitle("Percentage Hopeless by age") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  facet_wrap(~Hopeless_type)
 ```
+
+
+
+
+
+## Restlessness
+
+### Overall for different years
+```{r fig.width=10}
+psych_summ_all_grp_ovrl |>
+  filter(CATAG7>=4) |> 
+  select(-c(IRSEX, CATAG7,INCOME, EDUCCAT2)) |> 
+  group_by(YEAR) |> 
+  summarize(across(where(is.numeric), sum, na.rm = TRUE)) |> 
+  ungroup() |> 
+  mutate(Restless_123_percent=(Restless_1+Restless_2+Restless_3)/num_people,
+         Restless_1_percent=Restless_1/num_people,
+         Restless_12_percent=(Restless_1+Restless_2)/num_people,
+         Restless_any_percent=Restless_any/num_people) |> 
+  pivot_longer(cols=c(Restless_1_percent, Restless_12_percent, Restless_123_percent,Restless_any_percent), 
+               values_to = "Restless_Values", names_to = "Restless_type") |> 
+  ggplot(mapping=aes(x=YEAR, y=Restless_Values, color = Restless_type)) +
+  geom_line(size=1.5)+
+  xlab("Year") +
+  ylab("% Restless") +
+  ggtitle("Percentage Restless for different years") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_color_manual(
+      values = c("Restless_1_percent" = "brown","Restless_12_percent" = "maroon","Restless_123_percent" = "orange", 
+                 "Restless_any_percent" = "red"),
+      labels = c("All Times", "All or Most Times", "Little Time", "Atleast one time"),name = "Restless Category")
+```
+
+
+
+### Different Age Groups
+```{r fig.width=10}
+psych_summ_all_grp_ovrl |>
+  filter(CATAG7>=4) |>
+  select(-c(IRSEX,INCOME, EDUCCAT2)) |> 
+  group_by(YEAR, CATAG7) |> 
+  summarize(across(where(is.numeric), sum, na.rm = TRUE)) |> 
+  ungroup() |> 
+  mutate(Restless_1_percent=Restless_1/num_people,
+         Restless_any_percent=Restless_any/num_people) |> 
+  pivot_longer(cols=c(Restless_1_percent, Restless_any_percent),
+               values_to = "Restless_Values", names_to = "Restless_type") |> 
+  ggplot(mapping=aes(x=YEAR, y=Restless_Values, color = as.factor(CATAG7), group = as.factor(CATAG7))) +
+  geom_line(size=1.5)+
+  xlab("Year") +
+  ylab("% Restless") +
+  ggtitle("Percentage Restless by age") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  facet_wrap(~Restless_type)
+```
+
+
+
+
