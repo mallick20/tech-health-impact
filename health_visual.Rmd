@@ -1,7 +1,7 @@
 ---
-title: "Impact of Tech Use on Mental Health"
+title: "Visualizing Mental Health"
 author: "Anurag Mallick"
-date: "2025-05-03"
+date: "2025-05-01"
 output:
   html_document:
     toc: yes
@@ -29,10 +29,10 @@ We study mental health through the NSDUH survey which has certain indicator vari
 
 -   Feeling of Restlessness
 
-
 ## Psychological Distress
 
 We start with exploring the nervousness, hopelessness and restlessness for a period of 2002-2008.
+
 ```{r, warning=FALSE, message=FALSE, echo=FALSE}
 psych_summ_ovrl <- read_csv("health_eda/variable_eda/psych_summ_ovrl.csv", show_col_types = FALSE)
 psych_summ_age_ovrl <- read_csv("health_eda/variable_eda/psych_summ_age_ovrl.csv", show_col_types = FALSE)
@@ -40,33 +40,102 @@ psych_summ_inc_ovrl <- read_csv("health_eda/variable_eda/psych_summ_income_ovrl.
 psych_summ_edu_ovrl <- read_csv("health_eda/variable_eda/psych_summ_edu_ovrl.csv", show_col_types = FALSE)
 ```
 
-## Nervousness
 ```{r}
-psych_summ_ovrl |> 
-  mutate(Nervous_123_percent=(Nervous_1+Nervous_2+Nervous_3)/num_people,
-         Nervous_1_percent=Nervous_1/num_people,
-         Nervous_any_percent=Nervous_any/num_people) |> 
-  pivot_longer(cols=c(Nervous_123_percent,Nervous_1_percent, Nervous_any_percent), values_to = "Nervous_Values", names_to = "Nervous_type") |> 
-  ggplot(mapping=aes(x=YEAR, y=Nervous_Values, color = Nervous_type)) +
-  geom_line(size=1.5) +
-  
-  
+# This has each strata grouped by Gender, Age, Income and Education Level
+psych_summ_all_grp_ovrl <- read_csv("health_eda/variable_eda/psych_summ_all_grp_ovrl.csv", show_col_types = FALSE)
 ```
 
-### Different Age Groups
-```{r}
-psych_summ_age_ovrl |> 
+## Nervousness
+
+Nervousness number 1,2,3,4 shows different level of nervousness for the past 12 months.
+
+1 = All of the time 
+2 = Most of the time 
+3 = Some of the time 
+4 = A little of the time 
+
+### Overall for different years
+
+```{r fig.width=10}
+psych_summ_all_grp_ovrl |>
+  filter(CATAG7>=4) |> 
+  select(-c(IRSEX, CATAG7,INCOME, EDUCCAT2)) |> 
+  group_by(YEAR) |> 
+  summarize(across(where(is.numeric), sum, na.rm = TRUE)) |> 
+  ungroup() |> 
   mutate(Nervous_123_percent=(Nervous_1+Nervous_2+Nervous_3)/num_people,
          Nervous_1_percent=Nervous_1/num_people,
+         Nervous_12_percent=(Nervous_1+Nervous_2)/num_people,
          Nervous_any_percent=Nervous_any/num_people) |> 
-  pivot_longer(cols=c(Nervous_123_percent,Nervous_1_percent, Nervous_any_percent), values_to = "Nervous_Values", names_to = "Nervous_type") |> 
-  ggplot(mapping=aes(x=YEAR, y=Nervous_Values, group = CATAG7, color=CATAG7)) +
+  pivot_longer(cols=c(Nervous_1_percent, Nervous_12_percent, Nervous_123_percent,Nervous_any_percent), 
+               values_to = "Nervous_Values", names_to = "Nervous_type") |> 
+  ggplot(mapping=aes(x=YEAR, y=Nervous_Values, color = Nervous_type)) +
   geom_line(size=1.5)+
-  facet_wrap(~ Nervous_type)
+  xlab("Year") +
+  ylab("% Nervous") +
+  ggtitle("Percentage Nervous for different years") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_color_manual(
+      values = c("Nervous_1_percent" = "brown","Nervous_12_percent" = "maroon","Nervous_123_percent" = "orange", 
+                 "Nervous_any_percent" = "red"),
+      labels = c("All Times", "All or Most Times", "Little Time", "Atleast one time"),name = "Nervous Category")
 ```
+
+### Different Genders
+```{r fig.width=10}
+psych_summ_all_grp_ovrl |>
+  filter(CATAG7>=4) |> 
+  select(-c(CATAG7,INCOME, EDUCCAT2)) |> 
+  group_by(YEAR, IRSEX) |> 
+  summarize(across(where(is.numeric), sum, na.rm = TRUE)) |> 
+  ungroup() |> 
+  mutate(Nervous_1_percent=Nervous_1/num_people,
+         Nervous_any_percent=Nervous_any/num_people) |> 
+  pivot_longer(cols=c(Nervous_1_percent, Nervous_any_percent),
+               values_to = "Nervous_Values", names_to = "Nervous_type") |> 
+  ggplot(mapping=aes(x=YEAR, y=Nervous_Values, color = as.factor(IRSEX), group = as.factor(IRSEX))) +
+  geom_line(size=1.5)+
+  xlab("Year") +
+  ylab("% Nervous") +
+  ggtitle("Percentage Nervous by gender") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_color_manual(
+      values = c("1" = "orange", "2" = "cyan"),
+      labels = c("1" = "Male", "2" = "Female"),name = "Gender Category")  +
+  facet_wrap(~Nervous_type)
+```
+
+
+### Different Age Groups
+
+```{r fig.width=10}
+psych_summ_all_grp_ovrl |>
+  filter(CATAG7>=4) |>
+  select(-c(IRSEX,INCOME, EDUCCAT2)) |> 
+  group_by(YEAR, CATAG7) |> 
+  summarize(across(where(is.numeric), sum, na.rm = TRUE)) |> 
+  ungroup() |> 
+  mutate(Nervous_1_percent=Nervous_1/num_people,
+         Nervous_any_percent=Nervous_any/num_people) |> 
+  pivot_longer(cols=c(Nervous_1_percent, Nervous_any_percent),
+               values_to = "Nervous_Values", names_to = "Nervous_type") |> 
+  ggplot(mapping=aes(x=YEAR, y=Nervous_Values, color = as.factor(CATAG7), group = as.factor(CATAG7))) +
+  geom_line(size=1.5)+
+  xlab("Year") +
+  ylab("% Nervous") +
+  ggtitle("Percentage Nervous by age") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  facet_wrap(~Nervous_type)
+```
+
+
+
+
+
 
 
 ## Hopelessness
+
 ```{r}
 psych_summ_ovrl |> 
   mutate(Hopeless_123_percent=(Hopeless_1+Hopeless_2+Hopeless_3)/num_people,
@@ -77,8 +146,8 @@ psych_summ_ovrl |>
   geom_line(size=1.5)
 ```
 
-
 ### Different Age Groups
+
 ```{r}
 psych_summ_age_ovrl |> 
   mutate(Hopeless_123_percent=(Hopeless_1+Hopeless_2+Hopeless_3)/num_people,
