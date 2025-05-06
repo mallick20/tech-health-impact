@@ -1,0 +1,69 @@
+columns_to_select_list <- list(
+    "jul11-cps" = c("hryear4","peeduca","hufaminc","peage","pesex", "pesci1","pesc2a6","pelapt","petabl", "pegame","petvba","pehome","pewrka","peschl",
+                    "peliba","peotha","peprim1","ptprim2","pepr3a2","peprim6","peprim7","peprim8","peprim9",
+                    "peprim10","peprim11","peprim12","peprm141","peprm142","peprm143","peprm144","peprm145",
+                    "peprm146", "peprm147","hesci3","pehome", "pecafe", "peelhs", "pecomm", "pelibr", "pewrka", "peschl","peperscr"
+                    ,"hesci6","hesci5"),
+    
+    "jul13-cps" = c("hryear4","hufaminc","prtage","peeduca","pesex","hesci15","hesci11","hesci1","henet2","henet3","henet3a","henet41","henet42","henet43","henet44",
+                    "henet45","henet46","henet47","henet7a","henet6a","hesci15","hesci121","hesci122","hesci123","hesci124",
+                    "pedesk","pelapt","petabl","pecell","pegame","petvba","peprim1","peperscr",
+                    "ptprim2","peprm31","peprm32","peprm33","peprm34","peprm141","peprm142","peprm143","peprm144","peprm145",
+                    "peprm146","peprm147","peprm151","peprm153","peprm161","peprm162","peprm163","peprm164","pehome", "pecafe", "peelhs",
+                    "pecomm", "pelibr", "pewrka", "peschl","hesc2a9","hesc2a8","hesc2a7","hesc2a10","hesc2a11","hesc2a6","hesc2a5","hesc2a4","hesci124"
+                    ,"peprm35","peprm36","peprm37","peprm38","peprm39","peprm310","peprm311","peprm312","peprm313","peprm314","peprm315","peprm316","peprm317","peprim12"),
+    
+    "jul15-cps" = c("hryear4","peeduca","hefaminc","prtage","pesex","helaptop", "hedesktp", "hetablet", "hemphone", "hewearab", "hetvbox",
+                    "heinhome","heinschl","heincafe","heintrav","heinlico","heinelho", "heinwork", "peinhome", "peinwork","peemail", "petextim", "petelewk", "heevrout", "peincafe", "peinschl", "peinothr",
+                    "pegames", "pevideo","pecybuly", "hecbully","peprivacy", "hepspre1","henohm1","henohm2","henohm3","henohm4","henohm5","henohm6","henohm7","henohm8","henohm9","henohm10","henohm11",
+                    "henoou1","henoou2","henoou3","henoou4","henoou5","henoou6","henoou7","henoou8","henoou9","henoou10","henoou11"),
+    
+    "nov17-cps" = c("hryear4","peeduca","hefaminc","prtage","pesex","hedesktp", "helaptop", "hetablet", "hemphone", "hewearab", "hetvbox",
+                    "heinhome","heinwork", "heinschl", "heincafe", "heintrav", "heinlico", "heinelho", "heinothr",
+                    "peemail", "petextim", "pesocial", "peconfer", "pevideo", "peaudio", "pepublish",
+                    "petelewk", "pejobsch", "peedtrai", "peusesvc",
+                    "hepspre1", "hepspre2", "hepspre3", "hepspre4", "hepspre5","hecbully", "hepscon1", "hepscon2", "hepscon3",
+                    "hehomsu", "hepsensi","henohm1","henohm2","henohm3","henohm4","henohm5","henohm6","henohm7","henohm8","henohm9","henohm10", 
+                    "heprinoh", "prnohs", "heevrout","henoou1","henoou2","henoou3","henoou4","henoou5","henoou6","henoou7","henoou8","henoou9","henoou10", "heprinoo", "noous"),
+    
+    "nov19-cps" = c("hryear4","peeduca","hefaminc","prtage","pesex","hedesktp", "helaptop", "hetablet", "hemphone", "hewearab", "hetvbox",
+                    "heinhome", "heinwork", "heinschl", "heincafe", "heinlico", "heintrav", "heinelho", "heinothr",
+                    "peemail", "petextim", "pesocial", "peconfer", "pevideo", "peaudio", "pepublish", "petelewk", "pejobsch",
+                    "hecbully", "hepspre1", "henoou7", "henoou8"),
+    
+    "nov21-cps" = c("hryear4","peeduca","hefaminc","prtage","pesex","hedesktp","helaptop","hetablet","hemphone","hewearab","hetvbox",
+                    "heinhome", "heinwork", "heinschl", "heincafe", "heinlico", "heintrav", "heinelho", "heinothr",
+                    "peemail","petextim","pesocial","pegaming","peconfer","pevideo",
+                    "peaudio","pepublish","hehomte1","hehomte2","hehomte3","hehomte4","henetql","henetst",
+                    "hepscon1","hepscon2","hepscon3","hepscon4","hepscon5","hepscon6","hepscon7","hepscon8",
+                    "hepscyba","hedevqua","hedevsta","henetchk" ,"hemobdat"),
+    
+    "nov23-cps" = c("hryear4","peeduca","hefaminc","prtage","pesex","helaptop", "hedesktp", "hetablet", "hemphone", "hewearab", "hetvbox",
+                    "peemail", "petextim", "pesocial", "pegaming", "peconfer", "pevideo", "peaudio", "pepublish", "petelewk",
+                    "pejobsch","peedtrai","pegovts","peeduca","peusesvc","peesrvcs","peecomme","peegoods","pevoicea","pehomiot","hemedrec","hemeddoc",
+                    "hepspre1","hepspre2","hepspre3","hepspre4","hepspre5",
+                    "hehomte1","hehomte2","hehomte3","hehomte4", "heinhome", "heinwork", "heinschl", "heincafe", "heinlico",
+                    "heintrav", "heinelho", "heinothr", "henetql", "henetst","henetchk",
+                    "henohm1","henohm2","henohm3","henohm4","henohm5","henohm6","henohm7","henohm8","henohm9","henohm10",
+                    "hepscon1","hepscon2","hepscon3","hepscon4","hepscon5","hepscon6","hepscon7","hepscon8",
+                    "hepscyba","heinhome","heinwork", "heinschl", "heincafe", "heintrav", "heinlico", "heinelho",
+                    "heinothr","henetchk","helaptop", "hedesktp", "hetablet", "hemphone", "hewearab", "hetvbox",
+                    "peemail", "petextim", "pesocial", "pegaming", "peconfer", "pevideo", "peaudio", "petelewk",
+                    "hehnetql","hehomte3","hehomte2","hehomte1","hehmint",
+                    "hemobdat","henetchk"),
+    
+    "oct03-cps" = c("hryear4","peeduca","hufaminc","prtage","pesex", "hesc1","hesint1","hesint2a","hesevr", "hesint5a","pesch","peschw","pesch2","pesch2na","prnet2","prnet3",
+                    "prnet1","pesch7","pesnetd", "pesnetb","pesneti", "pesch5","pesch6","sch5","sch6","hescon2",
+                    "hesint6","hesint6f","hescon1","hescon2"),
+    
+    "oct07-cps" = c("hryear4","peeduca","hufaminc","peage","pesex","henet1", "penet2", "henet3", "henet4"),
+    
+    "oct09-cps" = c("hryear4","peeduca","hufaminc","peage","pesex","henet1","penet2","henet3","henet4","henet5"),
+    
+    "sep01-cps" = c("hryear4","hufaminc","prtage","peeduca","pesex","hesc1","hesc2","hesc3","hesc4","hesint1","hesint2a","hesint41","hesint42","hesint43","hesint44",
+                    "prnet1", "prnet2","pesex", "prnet3","hescon1",
+                    "pesnetsw", "pesnetsx", "pesnetsy", "pesnetsz",
+                    "sneta", "snetb", "snetc", "snetd", "snete", "snetf", "snetg", "sneth", "sneti", "snetj", "snetk", "snetl", "snetm", "snetn", "sneto", "snetp", "snetq",
+                    "pesch", "peschw", "sch5", "sch6", "sch7",
+                    "hescon2", "hesint5a")
+  )
