@@ -1,4 +1,12 @@
 library(rvest)
+library(dplyr)
+library(purrr)
+library(rlang)
+library(ggplot2)
+library(tidyr)
+
+#----------------- Webscraping  --------------------
+
 
 download_ntia_datasets <- function(url = "https://www.ntia.gov/page/download-ntia-internet-use-survey-datasets",
                                    file_types = c("csv.zip"),
@@ -35,6 +43,10 @@ download_ntia_datasets <- function(url = "https://www.ntia.gov/page/download-nti
 
 download_ntia_datasets()  # Now downloads only odd years from 01 to 23
 
+
+#----------------- Unzipping files -----------------------
+
+
 unzip_ntia_files <- function(zip_dir = ".", unzip_dir = tempfile()) {
   zip_files <- list.files(zip_dir, pattern = "\\.zip$", full.names = TRUE)
   
@@ -55,6 +67,10 @@ unzip_ntia_files <- function(zip_dir = ".", unzip_dir = tempfile()) {
 }
 unzipped_folder <- unzip_ntia_files(zip_dir = ".", unzip_dir = "unzipped_ntia_files")
 
+
+#---------------- reading csv -----------------------------
+
+
 read_ntia_csvs <- function(csv_dir) {
   csv_files <- list.files(csv_dir, pattern = "\\.csv$", full.names = TRUE)
   
@@ -74,6 +90,10 @@ read_ntia_csvs <- function(csv_dir) {
 }
 ntia_datasets <- read_ntia_csvs(csv_dir = unzipped_folder)
 
+
+#---------------------- cleaning dataset-----------------------
+
+
 clean_ntia_data <- function(dataset_list, na_value = -1) {
   cleaned_list <- lapply(dataset_list, function(df) {
     df[is.na(df)] <- na_value
@@ -83,7 +103,9 @@ clean_ntia_data <- function(dataset_list, na_value = -1) {
 }
 ntia_datasets <- clean_ntia_data(ntia_datasets)
 
-library(dplyr)
+
+#----------------- Selecting covariates requied for Analysis ---------------
+
 
 select_covars <- function(datasets, columns_to_select_list) {
   selected_data <- list()
@@ -110,20 +132,21 @@ select_covars <- function(datasets, columns_to_select_list) {
   return(selected_data)
 }
 
-count_ntia_rows <- function(dataset_list) {
-  row_counts <- sapply(dataset_list, nrow)
-  print(row_counts)
-  return(row_counts)
-}
-
-columns_to_select_list <- list(
-    "jul11-cps" = c("hryear4","pesci1","pesc2a6","pelapt","petabl", "pegame","petvba","pehome","pewrka","peschl",
+# Read the file as a string
+if (file.exists("columns_to_select_list.txt")) {
+  list_code <- readLines("columns_to_select_list.txt")
+  list_code <- paste(list_code, collapse = "\n")
+  eval(parse(text = list_code))
+  message("Loaded: columns_to_select_list")
+} else {
+  columns_to_select_list <- list(
+    "jul11-cps" = c("hryear4","peeduca","hufaminc","peage","pesex", "pesci1","pesc2a6","pelapt","petabl", "pegame","petvba","pehome","pewrka","peschl",
                     "peliba","peotha","peprim1","ptprim2","pepr3a2","peprim6","peprim7","peprim8","peprim9",
                     "peprim10","peprim11","peprim12","peprm141","peprm142","peprm143","peprm144","peprm145",
                     "peprm146", "peprm147","hesci3","pehome", "pecafe", "peelhs", "pecomm", "pelibr", "pewrka", "peschl","peperscr"
                     ,"hesci6","hesci5"),
     
-    "jul13-cps" = c("hryear4","hesci15","hesci11","hesci1","henet2","henet3","henet3a","henet41","henet42","henet43","henet44",
+    "jul13-cps" = c("hryear4","peeduca","hufaminc","prtage","pesex","hesci15","hesci11","hesci1","henet2","henet3","henet3a","henet41","henet42","henet43","henet44",
                     "henet45","henet46","henet47","henet7a","henet6a","hesci15","hesci121","hesci122","hesci123","hesci124",
                     "pedesk","pelapt","petabl","pecell","pegame","petvba","peprim1","peperscr",
                     "ptprim2","peprm31","peprm32","peprm33","peprm34","peprm141","peprm142","peprm143","peprm144","peprm145",
@@ -131,12 +154,12 @@ columns_to_select_list <- list(
                     "pecomm", "pelibr", "pewrka", "peschl","hesc2a9","hesc2a8","hesc2a7","hesc2a10","hesc2a11","hesc2a6","hesc2a5","hesc2a4","hesci124"
                     ,"peprm35","peprm36","peprm37","peprm38","peprm39","peprm310","peprm311","peprm312","peprm313","peprm314","peprm315","peprm316","peprm317","peprim12"),
     
-    "jul15-cps" = c("hryear4","helaptop", "hedesktp", "hetablet", "hemphone", "hewearab", "hetvbox",
+    "jul15-cps" = c("hryear4","peeduca","hefaminc","prtage","pesex","helaptop", "hedesktp", "hetablet", "hemphone", "hewearab", "hetvbox",
                     "heinhome","heinschl","heincafe","heintrav","heinlico","heinelho", "heinwork", "peinhome", "peinwork","peemail", "petextim", "petelewk", "heevrout", "peincafe", "peinschl", "peinothr",
                     "pegames", "pevideo","pecybuly", "hecbully","peprivacy", "hepspre1","henohm1","henohm2","henohm3","henohm4","henohm5","henohm6","henohm7","henohm8","henohm9","henohm10","henohm11",
                     "henoou1","henoou2","henoou3","henoou4","henoou5","henoou6","henoou7","henoou8","henoou9","henoou10","henoou11"),
     
-    "nov17-cps" = c("hryear4","hedesktp", "helaptop", "hetablet", "hemphone", "hewearab", "hetvbox",
+    "nov17-cps" = c("hryear4","peeduca","hefaminc","prtage","pesex","hedesktp", "helaptop", "hetablet", "hemphone", "hewearab", "hetvbox",
                     "heinhome","heinwork", "heinschl", "heincafe", "heintrav", "heinlico", "heinelho", "heinothr",
                     "peemail", "petextim", "pesocial", "peconfer", "pevideo", "peaudio", "pepublish",
                     "petelewk", "pejobsch", "peedtrai", "peusesvc",
@@ -144,19 +167,19 @@ columns_to_select_list <- list(
                     "hehomsu", "hepsensi","henohm1","henohm2","henohm3","henohm4","henohm5","henohm6","henohm7","henohm8","henohm9","henohm10", 
                     "heprinoh", "prnohs", "heevrout","henoou1","henoou2","henoou3","henoou4","henoou5","henoou6","henoou7","henoou8","henoou9","henoou10", "heprinoo", "noous"),
     
-    "nov19-cps" = c("hryear4","hedesktp", "helaptop", "hetablet", "hemphone", "hewearab", "hetvbox",
+    "nov19-cps" = c("hryear4","peeduca","hefaminc","prtage","pesex","hedesktp", "helaptop", "hetablet", "hemphone", "hewearab", "hetvbox",
                     "heinhome", "heinwork", "heinschl", "heincafe", "heinlico", "heintrav", "heinelho", "heinothr",
                     "peemail", "petextim", "pesocial", "peconfer", "pevideo", "peaudio", "pepublish", "petelewk", "pejobsch",
                     "hecbully", "hepspre1", "henoou7", "henoou8"),
     
-    "nov21-cps" = c("hryear4","hedesktp","helaptop","hetablet","hemphone","hewearab","hetvbox",
+    "nov21-cps" = c("hryear4","peeduca","hefaminc","prtage","pesex","hedesktp","helaptop","hetablet","hemphone","hewearab","hetvbox",
                     "heinhome", "heinwork", "heinschl", "heincafe", "heinlico", "heintrav", "heinelho", "heinothr",
                     "peemail","petextim","pesocial","pegaming","peconfer","pevideo",
                     "peaudio","pepublish","hehomte1","hehomte2","hehomte3","hehomte4","henetql","henetst",
                     "hepscon1","hepscon2","hepscon3","hepscon4","hepscon5","hepscon6","hepscon7","hepscon8",
                     "hepscyba","hedevqua","hedevsta","henetchk" ,"hemobdat"),
     
-    "nov23-cps" = c("hryear4","helaptop", "hedesktp", "hetablet", "hemphone", "hewearab", "hetvbox",
+    "nov23-cps" = c("hryear4","peeduca","hefaminc","prtage","pesex","helaptop", "hedesktp", "hetablet", "hemphone", "hewearab", "hetvbox",
                     "peemail", "petextim", "pesocial", "pegaming", "peconfer", "pevideo", "peaudio", "pepublish", "petelewk",
                     "pejobsch","peedtrai","pegovts","peusesvc","peesrvcs","peecomme","peegoods","pevoicea","pehomiot","hemedrec","hemeddoc",
                     "hepspre1","hepspre2","hepspre3","hepspre4","hepspre5",
@@ -170,27 +193,39 @@ columns_to_select_list <- list(
                     "hehnetql","hehomte3","hehomte2","hehomte1","hehmint",
                     "hemobdat","henetchk"),
     
-    "oct03-cps" = c("hryear4", "hesc1","hesint1","hesint2a","hesevr", "hesint5a","pesch","peschw","pesch2","pesch2na","prnet2","prnet3",
+    "oct03-cps" = c("hryear4","peeduca","hufaminc","prtage","pesex", "hesc1","hesint1","hesint2a","hesevr", "hesint5a","pesch","peschw","pesch2","pesch2na","prnet2","prnet3",
                     "prnet1","pesch7","pesnetd", "pesnetb","pesneti", "pesch5","pesch6","sch5","sch6","hescon2",
                     "hesint6","hesint6f","hescon1","hescon2"),
     
-    "oct07-cps" = c("hryear4","henet1", "penet2", "henet3", "henet4"),
+    "oct07-cps" = c("hryear4","peeduca","hufaminc","peage","pesex","henet1", "penet2", "henet3", "henet4"),
     
-    "oct09-cps" = c("hryear4","henet1","penet2","henet3","henet4","henet5"),
+    "oct09-cps" = c("hryear4","peeduca","hufaminc","peage","pesex","henet1","penet2","henet3","henet4","henet5"),
     
-    "sep01-cps" = c("hryear4","hesc1","hesc2","hesc3","hesc4","hesint1","hesint2a","hesint41","hesint42","hesint43","hesint44",
-                    "prnet1", "prnet2", "prnet3","hescon1",
+    "sep01-cps" = c("hryear4","peeduca","hufaminc","prtage","pesex","hesc1","hesc2","hesc3","hesc4","hesint1","hesint2a","hesint41","hesint42","hesint43","hesint44",
+                    "prnet1", "prnet2","pesex", "prnet3","hescon1",
                     "pesnetsw", "pesnetsx", "pesnetsy", "pesnetsz",
                     "sneta", "snetb", "snetc", "snetd", "snete", "snetf", "snetg", "sneth", "sneti", "snetj", "snetk", "snetl", "snetm", "snetn", "sneto", "snetp", "snetq",
                     "pesch", "peschw", "sch5", "sch6", "sch7",
                     "hescon2", "hesint5a")
   )
-
+}
 # Select specific covariates
 ntia_selected <- select_covars(ntia_datasets, columns_to_select_list)
 ntia_selected <- ntia_selected[order(as.numeric(gsub("\\D", "", names(ntia_selected))))]
+
+
+#----------------- getting population size for every year ------------
+
+
+count_ntia_rows <- function(dataset_list) {
+  row_counts <- sapply(dataset_list, nrow)
+  print(row_counts)
+  return(row_counts)
+}
 row_counts <- count_ntia_rows(ntia_selected)
 
+
+#------------------ Merging all the data -----------------------------
 standardize_columns <- function(df, all_columns, filler = -1) {
   missing_cols <- setdiff(all_columns, names(df))
   for (col in missing_cols) {
@@ -200,273 +235,365 @@ standardize_columns <- function(df, all_columns, filler = -1) {
   df <- df[, all_columns]
   return(df)
 }
-
 all_columns <- unique(unlist(lapply(ntia_selected, names)))
-
 standardized_list <- lapply(ntia_selected, standardize_columns, all_columns = all_columns)
 merged_ntia <- do.call(rbind, standardized_list)
 
 
-library(dplyr)
-count_ones <- function(data, column_name) {
-  column_sym <- ensym(column_name)
-  data %>%
-    filter(!!column_sym == 1) %>%
-    summarise(count = n()) %>%
-    pull(count)
+#----------------- Merging columns that are the same -----------------------
+merge_columns <- function(col1, col2, na_value = -1) {
+  merged <- ifelse(col1 != na_value, col1,
+                   ifelse(col2 != na_value, col2, na_value))
+  return(merged)
 }
-total_computers_count <- function(data, variable_name) {
-  variable_sym <- rlang::sym(variable_name)
+merged_ntia$peage <- merge_columns(merged_ntia$peage, merged_ntia$prtage)
+merged_ntia$hufaminc <- merge_columns(merged_ntia$hufaminc, merged_ntia$hefaminc)
+
+#---------------- Categorizing for the analysis by Income -------------------------
+
+collapse_income_brackets <- function(df, income_var , new_var) {
+  df[[new_var]] <- with(df, ifelse(df[[income_var]] %in% 1:6, 1,
+                                   ifelse(df[[income_var]] %in% 7:11, 2,
+                                          ifelse(df[[income_var]] %in% 12:13, 3,
+                                                 ifelse(df[[income_var]] %in% 14:16, 4, -1)))))
   
-  total <- data %>%
-    mutate(num_computers = as.numeric(!!variable_sym)) %>%
-    filter(num_computers > 0) %>%
-    summarise(total = sum(num_computers)) %>%
-    pull(total)
-  
-  return(total)
+  return(df)
 }
-summarise_parent_concern <- function(data, variable_name) {
-  variable_sym <- rlang::sym(variable_name)
-  
-  data %>%
-    mutate(parent_concern = recode(!!variable_sym,
-                                   `1` = "More concerned",
-                                   `2` = "Less concerned",
-                                   `3` = "About the same",
-                                   .default = NA_character_)) %>%
-    count(parent_concern, sort = TRUE)
+merged_ntia <- collapse_income_brackets(merged_ntia,"hufaminc","hefaminc")
+
+#---------------- Categorizing for the analysis by Age -------------------------
+categorize_age_base <- function(age) {
+  ifelse(age >= 18 & age <= 20, 4,
+         ifelse(age >= 21 & age <= 25, 5,
+                ifelse(age >= 26 & age <= 34, 6,
+                       ifelse(age >= 35,             7,
+                              -1))))
 }
-count_positive_computers <- function(data, variable_name) {
-  variable_sym <- rlang::sym(variable_name)
-  
-  data %>%
-    mutate(num_computers = as.numeric(!!variable_sym)) %>%
-    filter(num_computers > 0) %>%
-    summarise(count = n()) %>%
-    pull(count)
-}
-count_internet_users <- function(data) {
-  sum(data$peprim1 %in% 1:5, na.rm = TRUE)
+merged_ntia$prtage <- categorize_age_base(merged_ntia$peage)
+
+#---------------- Categorizing for the analysis by Educational Qualifications -------------------------
+
+categorize_education <- function(df, educ_var, age_var, new_var = "educ_group") {
+  df[[new_var]] <- with(df, ifelse(df[[age_var]] <= 6, 5,
+                                   ifelse(df[[educ_var]] <= 38 & df[[age_var]] >= 7, 1,
+                                          ifelse(df[[educ_var]] == 39 & df[[age_var]] >= 7, 2,
+                                                 ifelse(df[[educ_var]] %in% 40:42 & df[[age_var]] >= 7, 3,
+                                                        ifelse(df[[educ_var]] >= 43 & df[[age_var]] >= 7, 4, NA))))))
+  return(df)
 }
 
-data_01 <- subset(merged_ntia, hryear4 == 2001)
-net_user_2001 <- count_ones(data_01, hesint1)
 
-data_03 <- subset(merged_ntia, hryear4 == 2003)
-net_user_2003 <- count_ones(data_03, hesint1)
-
-data_07 <- subset(merged_ntia, hryear4 == 2007)
-net_user_2007 <- count_ones(data_07, henet1)
-
-data_09 <- subset(merged_ntia, hryear4 == 2009)
-net_user_2009 <- count_ones(data_09, henet1)
-
-data_11 <- subset(merged_ntia, hryear4 == 2011)
-cols_to_check <- c("hesci6", "hesci5")
-net_user_2011 <- ifelse(rowSums(data_11[, cols_to_check] == 1) >= 1, 1, 2)
-net_user_2011 <-  sum(net_user_2011 == 1)
-
-data_13 <- subset(merged_ntia, hryear4 == 2013)
-data_13 <- data_13 %>%
-  mutate(peprim1 = case_when(
-    peprim1 %in% 1:5 ~ 1,
-    peprim1 == 6 ~ 2,
-    TRUE ~ -1
-  ))
-data_13 <- data_13 %>%
-  mutate(peprim12 = case_when(
-    peprim12 %in% 1:3 ~ 1,
-    TRUE ~ peprim12  # keep all other values as-is
-  ))
-
-cols_to_check <- c("henet3","henet2","henet3a","peprim1","pedesk","pelapt","petabl",
-                   "pecell","pegame","petvba","pehome", "pecafe", "peelhs", "pecomm", 
-                   "pelibr", "pewrka", "peschl","peperscr","hesci1","hesci11","peprim12")
-net_user_2013 <- ifelse(rowSums(data_13[, cols_to_check] == 1) >= 1, 1, 2)
-net_user_2013 <- sum(net_user_2013 == 1)
-net_user_2013
-
-
-data_15 <- subset(merged_ntia, hryear4 == 2015)
-cols_to_check <- c("heinhome","heinschl","heincafe","heintrav","heinlico","heinelho", "heinwork",
-                   "helaptop", "hedesktp", "hetablet", "hemphone", "hewearab", "hetvbox")
-net_user_2015 <- ifelse(rowSums(data_15[, cols_to_check] == 1) >= 1, 1, 2)
-net_user_2015 <-  sum(net_user_2015 == 1)
-
-data_17 <- subset(merged_ntia, hryear4 == 2017)
-cols_to_check <- c("heinhome","heinwork", "heinschl", "heincafe", "heintrav", "heinlico", "heinelho", "heinothr","helaptop", "hedesktp", "hetablet", "hemphone", "hewearab", "hetvbox")
-net_user_2017 <- ifelse(rowSums(data_17[, cols_to_check] == 1) >= 1, 1, 2)
-net_user_2017 <-  sum(net_user_2017 == 1)
-
-data_19 <- subset(merged_ntia, hryear4 == 2019)
-cols_to_check <- c("heinhome","heinwork", "heinschl", "heincafe", "heintrav", "heinlico", "heinelho",
-                   "heinothr","helaptop", "hedesktp", "hetablet", "hemphone", "hewearab", "hetvbox",
-                   "peemail", "petextim", "pesocial", "peconfer", "pevideo", "peaudio", "petelewk")
-net_user_2019 <- ifelse(rowSums(data_19[, cols_to_check] == 1) >= 1, 1, 2)
-net_user_2019 <-  sum(net_user_2019 == 1)
-
-data_21 <- subset(merged_ntia, hryear4 == 2021)
-cols_to_check <- c("hedesktp","helaptop","hetablet","hemphone","hewearab","hetvbox",
-                   "heinhome", "heinwork", "heinschl", "heincafe", "heinlico", "heintrav", "heinelho", "heinothr")
-net_user_2021 <- ifelse(rowSums(data_21[, cols_to_check] == 1) >= 1, 1, 2)
-net_user_2021 <-  sum(net_user_2021 == 1)
-
-data_23 <- subset(merged_ntia, hryear4 == 2023)
-cols_to_check <- c("heinhome","heinwork", "heinschl", "heincafe", "heintrav", "heinlico", "heinelho",
-                   "heinothr","henetchk","helaptop", "hedesktp", "hetablet", "hemphone", "hewearab", "hetvbox")
-net_user_2023 <- ifelse(rowSums(data_23[, cols_to_check] == 1) >= 1, 1, 2)
-net_user_2023 <-  sum(net_user_2023 == 1)
-
-
-
-
-observed <- c("net_user_2001","net_user_2003","net_user_2007","net_user_2009","net_user_2011","net_user_2013","net_user_2015"
-             ,"net_user_2017","net_user_2019","net_user_2021","net_user_2023")
-observed_val <- c(net_user_2001,net_user_2003,net_user_2007,net_user_2009,net_user_2011,net_user_2013,net_user_2015
-              ,net_user_2017,net_user_2019,net_user_2021,net_user_2023)
-named_values <- setNames(observed_val,observed)
-net_users_counts <- data.frame(
-  internet_user_content = names(named_values),
-  internet_user_values = as.numeric(named_values),
-  stringsAsFactors = FALSE
-)
-net_users_counts$year <- as.numeric(sub("net_user_", "", net_users_counts$internet_user_content))
-
-row_counts_df <- data.frame(
-  cps = names(row_counts),
-  total = as.integer(row_counts)
+valid_vars_by_year_net <- list(
+  "2001" = c("hesint1"),
+  "2003" = c("hesint1"),
+  "2007" = c("henet1"),
+  "2009" = c("henet1"),
+  "2011" = c("hesci6", "hesci5"),
+  "2013" = c("henet3","henet2","henet3a","pedesk","pelapt","petabl",
+             "pecell","pegame","petvba","pehome", "pecafe", "peelhs", "pecomm", 
+             "pelibr", "pewrka", "peschl","peperscr","hesci1","hesci11"),
+  "2015" = c("heinhome","heinschl","heincafe","heintrav","heinlico","heinelho", "heinwork",
+             "helaptop", "hedesktp", "hetablet", "hemphone", "hewearab", "hetvbox"),
+  "2017" = c("heinhome","heinwork", "heinschl", "heincafe", "heintrav", "heinlico",
+             "heinelho", "heinothr","helaptop", "hedesktp", "hetablet", "hemphone", "hewearab", "hetvbox"),
+  "2019" = c("heinhome","heinwork", "heinschl", "heincafe", "heintrav", "heinlico", "heinelho",
+             "heinothr","helaptop", "hedesktp", "hetablet", "hemphone", "hewearab", "hetvbox",
+             "peemail", "petextim", "pesocial", "peconfer", "pevideo", "peaudio", "petelewk"),
+  "2021" = c("hedesktp","helaptop","hetablet","hemphone","hewearab","hetvbox",
+             "heinhome", "heinwork", "heinschl", "heincafe", "heinlico", "heintrav", "heinelho", "heinothr"),
+  "2023" = c("heinhome","heinwork", "heinschl", "heincafe", "heintrav", "heinlico", "heinelho",
+             "heinothr","henetchk","helaptop", "hedesktp", "hetablet", "hemphone", "hewearab", "hetvbox")
 )
 
-# Extract 2-digit year and convert to 4-digit year
-row_counts_df$year <- as.integer(
-  ifelse(
-    as.integer(sub(".*([0-9]{2})-cps", "\\1", row_counts_df$cps)) < 50,
-    paste0("20", sub(".*([0-9]{2})-cps", "\\1", row_counts_df$cps)),
-    paste0("19", sub(".*([0-9]{2})-cps", "\\1", row_counts_df$cps))
+
+valid_vars_by_year_device <- list(
+  "2001" = c("hesc1"),
+  "2003" = c("hesc1"),
+  "2011" = c("hesci3"),
+  "2013" = c("henet3","henet2","peprim1","pedesk","pelapt","petabl","pecell","pegame","petvba",
+             "pehome", "pecafe", "peelhs", "pecomm","pelibr", "pewrka", "peschl","hesci1"),
+  "2015" = c("helaptop", "hedesktp", "hetablet", "hemphone", "hewearab", "hetvbox"),
+  "2017" = c("helaptop", "hedesktp", "hetablet", "hemphone", "hewearab", "hetvbox"),
+  "2019" = c("helaptop", "hedesktp", "hetablet", "hemphone", "hewearab", "hetvbox"),
+  "2021" = c("hedesktp","helaptop","hetablet","hemphone","hewearab","hetvbox"),
+  "2023" = c("helaptop","hedesktp","hetablet","hemphone","hewearab","hetvbox")
+)
+
+#--------------- Function for getting technology use by education qualifications
+
+summarize_by_educ_group <- function(valid_vars_by_year) {
+  result <- bind_rows(
+    lapply(names(valid_vars_by_year), function(y) {
+      vars <- valid_vars_by_year[[y]]
+      vars <- vars[vars %in% colnames(merged_ntia)]  # Keep only existing vars
+      
+      if (length(vars) == 0) return(NULL)
+      
+      merged_ntia %>%
+        filter(hryear4 == as.integer(y), educ_group %in% c(1, 2, 3, 4, 5)) %>%
+        mutate(
+          has_one = rowSums(select(., all_of(vars)) == 1 & select(., all_of(vars)) != -1, na.rm = TRUE) > 0
+        ) %>%
+        group_by(hryear4, educ_group) %>%
+        summarise(count = sum(has_one), .groups = "drop")
+    })
   )
-)
+  
+  return(result)
+}
 
-# Merge the data frames by year
-net_table <- merge(net_users_counts, row_counts_df, by = "year")
 
-# Calculate percentage
-net_table$percent <- (net_table$internet_user_values / net_table$total) * 100
+#--------------- Function for getting technology use by particular age categories
 
-# View result
-net_table
+summarize_by_age_group <- function(valid_vars_by_year) {
+  result <- bind_rows(
+    lapply(names(valid_vars_by_year), function(y) {
+      vars <- valid_vars_by_year[[y]]
+      vars <- vars[vars %in% colnames(merged_ntia)]  # Keep only existing vars
+      
+      if (length(vars) == 0) return(NULL)
+      
+      merged_ntia %>%
+        filter(hryear4 == as.integer(y), prtage %in% c(4,5,6,7)) %>%
+        mutate(
+          has_one = rowSums(select(., all_of(vars)) == 1 & select(., all_of(vars)) != -1, na.rm = TRUE) > 0
+        ) %>%
+        group_by(hryear4, prtage) %>%
+        summarise(count = sum(has_one), .groups = "drop")
+    })
+  )
+  
+  return(result)
+}
 
-# Load ggplot2 for plotting
-library(ggplot2)
 
-# Line plot
-ggplot(net_table, aes(x = year, y = percent)) +
-  geom_line() +
-  geom_point() +
-  labs(title = "Percentage Of Households That Use Internet Over Time",
-       x = "Year",
-       y = "Percentage of Households") +
+#--------------- Function for getting technology use by particular gender categories
+
+summarize_by_gender_group <- function(valid_vars_by_year) {
+  result <- bind_rows(
+    lapply(names(valid_vars_by_year), function(y) {
+      vars <- valid_vars_by_year[[y]]
+      vars <- vars[vars %in% colnames(merged_ntia)]  # Keep only existing vars
+      
+      if (length(vars) == 0) return(NULL)
+      
+      merged_ntia %>%
+        filter(hryear4 == as.integer(y), pesex %in% c(1,2)) %>%
+        mutate(
+          has_one = rowSums(select(., all_of(vars)) == 1 & select(., all_of(vars)) != -1, na.rm = TRUE) > 0
+        ) %>%
+        group_by(hryear4, pesex) %>%
+        summarise(count = sum(has_one), .groups = "drop")
+    })
+  )
+  
+  return(result)
+}
+
+
+#--------------- Function for getting technology use by particular income categories
+
+summarize_by_income_group <- function(valid_vars_by_year) {
+  result <- bind_rows(
+    lapply(names(valid_vars_by_year), function(y) {
+      vars <- valid_vars_by_year[[y]]
+      vars <- vars[vars %in% colnames(merged_ntia)]  # Keep only existing vars
+      
+      if (length(vars) == 0) return(NULL)
+      
+      merged_ntia %>%
+        filter(hryear4 == as.integer(y), hefaminc %in% c(1,2,3,4)) %>%
+        mutate(
+          has_one = rowSums(select(., all_of(vars)) == 1 & select(., all_of(vars)) != -1, na.rm = TRUE) > 0
+        ) %>%
+        group_by(hryear4, hefaminc) %>%
+        summarise(count = sum(has_one), .groups = "drop")
+    })
+  )
+  
+  return(result)
+}
+
+
+#--------------- Function for getting technology use by total population
+
+summarize_tech_use_total <- function(varlist_by_year) {
+  result <- bind_rows(
+    lapply(names(varlist_by_year), function(y) {
+      vars <- varlist_by_year[[y]]
+      vars <- vars[vars %in% colnames(merged_ntia)]  # Only keep existing variables
+      
+      if (length(vars) == 0) return(NULL)  # Skip if no valid columns
+      
+      merged_ntia %>%
+        filter(hryear4 == as.integer(y)) %>%
+        mutate(
+          has_one = rowSums(select(., all_of(vars)) == 1 & select(., all_of(vars)) != -1, na.rm = TRUE) > 0
+        ) %>%
+        summarise(hryear4 = first(hryear4), count = sum(has_one))
+    })
+  )
+  
+  return(result)
+}
+
+
+#======================== Calculating Househlds with Internet ===========================
+
+result_net_tot <- summarize_tech_use_total(valid_vars_by_year_net)
+
+ggplot(result_net_tot, aes(x = hryear4, y = count)) +
+  geom_line(size = 1.2) +
+  geom_point(size = 2) +
+  labs(
+    title = "Count of Internet Usage (Any 1) by Year",
+    x = "Year",
+    y = "Count"
+  ) +
+  theme_minimal()
+
+
+#=========================== Calculating Internet access according to Income categories======================
+
+result_income <- summarize_by_income_group(valid_vars_by_year_net)
+
+ggplot(result_income, aes(x = hryear4, y = count, color = factor(hefaminc), group = hefaminc)) +
+  geom_line(size = 1) +
+  geom_point(size = 2) +
+  labs(
+    title = "Count of Rows with At Least One '1' in Relevant Variables",
+    x = "Year",
+    y = "Count",
+    color = "income"
+  ) +
+  theme_minimal()
+
+
+#=========================== Calculating Internet access according to Gender categories======================
+
+result_gender <- summarize_by_gender_group(valid_vars_by_year_net)
+
+ggplot(result_gender, aes(x = hryear4, y = count, color = factor(pesex), group = pesex)) +
+  geom_line(size = 1) +
+  geom_point(size = 2) +
+  labs(
+    title = "Count of Rows with At Least One '1' in Relevant Variables",
+    x = "Year",
+    y = "Count",
+    color = "Gender"
+  ) +
+  theme_minimal()
+
+
+#=========================== Calculating Internet access according to Age categories======================
+
+result_age <- summarize_by_age_group(valid_vars_by_year_net)
+
+ggplot(result_age, aes(x = hryear4, y = count, color = factor(prtage), group = prtage)) +
+  geom_line(size = 1) +
+  geom_point(size = 2) +
+  labs(
+    title = "Count of Rows with At Least One '1' in Relevant Variables",
+    x = "Year",
+    y = "Count",
+    color = "Age"
+  ) +
   theme_minimal()
 
 
 
+#=========================== Calculating Internet access according to Education categories======================
 
+result_education_net <- summarize_by_educ_group(valid_vars_by_year_net)
 
-comp_user_2001 <- count_ones(data_01, "hesc1")
-
-comp_user_2003 <- count_ones(data_03, "hesc1")
-
-comp_user_2011 <- count_positive_computers(data_11, "hesci3")
-
-cols_to_check <- c("henet3","henet2","peprim1","pedesk","pelapt","petabl","pecell","pegame","petvba",
-                   "pehome", "pecafe", "peelhs", "pecomm","pelibr", "pewrka", "peschl","hesci1")
-comp_user_2013 <- ifelse(rowSums(data_13[, cols_to_check] == 1) >= 1, 1, 2)
-comp_user_2013 <- sum(comp_user_2013 == 1)
-
-cols_to_check <- c("helaptop", "hedesktp", "hetablet", "hemphone", "hewearab", "hetvbox")
-comp_user_2015 <- ifelse(rowSums(data_15[, cols_to_check] == 1) >= 1, 1, 2)
-comp_user_2015 <-  sum(comp_user_2015 == 1)
-
-cols_to_check <- c("helaptop", "hedesktp", "hetablet", "hemphone", "hewearab", "hetvbox")
-comp_user_2017 <- ifelse(rowSums(data_17[, cols_to_check] == 1) >= 1, 1, 2)
-comp_user_2017 <-  sum(comp_user_2017 == 1)
-
-cols_to_check <- c("helaptop", "hedesktp", "hetablet", "hemphone", "hewearab", "hetvbox")
-comp_user_2019 <- ifelse(rowSums(data_19[, cols_to_check] == 1) >= 1, 1, 2)
-comp_user_2019 <-  sum(comp_user_2019 == 1)
-
-cols_to_check <- c("hedesktp","helaptop","hetablet","hemphone","hewearab","hetvbox")
-comp_user_2021 <- ifelse(rowSums(data_21[, cols_to_check] == 1) >= 1, 1, 2)
-comp_user_2021 <-  sum(comp_user_2021 == 1)
-
-data_23 <- ntia_selected[["nov23-cps"]]
-cols_to_check <- c("helaptop", "hedesktp", "hetablet", "hemphone", "hewearab", "hetvbox")
-comp_user_2023 <- ifelse(rowSums(data_23[, cols_to_check] == 1) >= 1, 1, 2)
-comp_user_2023 <-  sum(comp_user_2023 == 1)
-
-
-
-observed <- c("comp_user_2001","comp_user_2003","comp_user_2011","comp_user_2013","comp_user_2015"
-              ,"comp_user_2017","comp_user_2019","comp_user_2021","comp_user_2023")
-observed_val <- c(comp_user_2001,comp_user_2003,comp_user_2011,comp_user_2013,comp_user_2015
-                  ,comp_user_2017,comp_user_2019,comp_user_2021,comp_user_2023)
-named_values <- setNames(observed_val,observed)
-comp_users_counts <- data.frame(
-  computer_user_content = names(named_values),
-  computer_user_values = as.numeric(named_values),
-  stringsAsFactors = FALSE
-)
-comp_users_counts$year <- as.numeric(sub("comp_user_", "", comp_users_counts$computer_user_content))
-
-row_counts_df <- data.frame(
-  cps = names(row_counts),
-  total = as.integer(row_counts)
-)
-
-# Extract 2-digit year and convert to 4-digit year
-row_counts_df$year <- as.integer(
-  ifelse(
-    as.integer(sub(".*([0-9]{2})-cps", "\\1", row_counts_df$cps)) < 50,
-    paste0("20", sub(".*([0-9]{2})-cps", "\\1", row_counts_df$cps)),
-    paste0("19", sub(".*([0-9]{2})-cps", "\\1", row_counts_df$cps))
-  )
-)
-
-# Merge the data frames by year
-comp_table <- merge(comp_users_counts, row_counts_df, by = "year")
-
-# Calculate percentage
-comp_table$percent <- (comp_table$computer_user_values / comp_table$total) * 100
-comp_table
-
-# Load ggplot2 for plotting
-library(ggplot2)
-
-# Line plot
-ggplot(comp_table, aes(x = year, y = percent)) +
-  geom_line() +
-  geom_point() +
-  labs(title = "Percentage Of Households That Use Device Over Time",
-       x = "Year",
-       y = "Percentage of Households") +
+ggplot(result_education_net, aes(x = hryear4, y = count, color = factor(educ_group), group = educ_group)) +
+  geom_line(size = 1) +
+  geom_point(size = 2) +
+  labs(
+    title = "Count of Rows with At Least One '1' in Relevant Variables",
+    x = "Year",
+    y = "Count",
+    color = "Education"
+  ) +
   theme_minimal()
 
 
+#======================= Calculating Device access to every household ===========================
 
 
-net_user_2023 <- count_ones(data_01, hesint1)
+result_device_tot <- summarize_tech_use_total(valid_vars_by_year_device)
 
-sum(temp_result == 1)
-comp_user_2001 <- count_ones(ntia_selected[["sep01-cps"]], "hesc1")
+ggplot(result_device_tot, aes(x = hryear4, y = count)) +
+  geom_line(size = 1.2) +
+  geom_point(size = 2) +
+  labs(
+    title = "Count of Internet Usage (Any 1) by Year",
+    x = "Year",
+    y = "Count"
+  ) +
+  theme_minimal()
 
-comp_user_2003 <- count_ones(ntia_selected[["oct03-cps"]], "hesc1")
 
-count_positive_computers(ntia_selected[["jul11-cps"]], "hesci3")
+#=========================== Calculating technology access according to Income categories======================
 
-try <- with(ntia_selected[["jul13-cps"]], ifelse("pedesk" == 1 | "pelapt" == 1, 1, 2))
-temp_result <- ifelse(ntia_selected[["jul13-cps"]]$pedesk == 1 | ntia_selected[["jul13-cps"]]$pelapt == 1, 1, 2)
-comp_user_2011 <- total_computers_count(ntia_selected[["jul11-cps"]], "hesci3")
+result_income <- summarize_by_income_group(valid_vars_by_year_device)
 
-comp_user_2013 <- count_ones(ntia_selected[["jul13-cps"]], pedesk)
-comp_user_2013_1 <- count_ones(ntia_selected[["jul13-cps"]], pelapt)
-comp_user_2013_2 <- count_ones(ntia_selected[["jul13-cps"]], pecell)
+ggplot(result_income, aes(x = hryear4, y = count, color = factor(hefaminc), group = hefaminc)) +
+  geom_line(size = 1) +
+  geom_point(size = 2) +
+  labs(
+    title = "Count of Rows with At Least One '1' in Relevant Variables",
+    x = "Year",
+    y = "Count",
+    color = "income"
+  ) +
+  theme_minimal()
+
+
+#=========================== Calculating technology access according to Gender categories======================
+
+result_gender <- summarize_by_gender_group(valid_vars_by_year_device)
+
+ggplot(result_gender, aes(x = hryear4, y = count, color = factor(pesex), group = pesex)) +
+  geom_line(size = 1) +
+  geom_point(size = 2) +
+  labs(
+    title = "Count of Rows with At Least One '1' in Relevant Variables",
+    x = "Year",
+    y = "Count",
+    color = "Gender"
+  ) +
+  theme_minimal()
+
+
+#=========================== Calculating technology access according to Age categories======================
+
+result_age <- summarize_by_age_group(valid_vars_by_year_device)
+
+ggplot(result_age, aes(x = hryear4, y = count, color = factor(prtage), group = prtage)) +
+  geom_line(size = 1) +
+  geom_point(size = 2) +
+  labs(
+    title = "Count of Rows with At Least One '1' in Relevant Variables",
+    x = "Year",
+    y = "Count",
+    color = "Age"
+  ) +
+  theme_minimal()
+
+
+#=========================== Calculating technology access according to Education Qualifications categories======================
+
+
+result_education <- summarize_by_educ_group("educ_group",valid_vars_by_year_device)
+
+ggplot(result_education, aes(x = hryear4, y = count, color = factor(educ_group), group = educ_group)) +
+  geom_line(size = 1) +
+  geom_point(size = 2) +
+  labs(
+    title = "Count of Rows with At Least One '1' by Education Group",
+    x = "Year",
+    y = "Count",
+    color = "Education"
+  ) +
+  theme_minimal()
