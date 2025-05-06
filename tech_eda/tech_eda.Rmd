@@ -1,6 +1,0 @@
----
-title: "tech_eda"
-output: html_document
----
-
-'''{r}
