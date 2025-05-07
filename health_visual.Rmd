@@ -12,7 +12,7 @@ classoption: twoside
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 library(tidyverse)
 library(tidycensus)
 library(ggplot2)
@@ -145,7 +145,10 @@ psych_summ_all_grp_ovrl |>
   ylab("% Nervous") +
   ggtitle("Percentage Nervous by income") +
   theme(plot.title = element_text(hjust = 0.5)) +
-  facet_wrap(~Nervous_type)
+  facet_wrap(~Nervous_type) + 
+  scale_colour_manual(name = "Income Group",
+    values = c("1" = "lightblue","2" = "orange","3" = "darkgrey","4" = "maroon"),
+    labels = c("1" = "Less than $20,000","2" = "$20,000 - $49,999","3" = "$50,000 - $74,999","4" = "$75,000 or More"))
 ```
 
 
@@ -258,5 +261,135 @@ psych_summ_all_grp_ovrl |>
 ```
 
 
+## For all emotions
+
+### By Income Group
+```{r fig.width=10}
+psych_summ_all_grp_ovrl |>
+  filter(CATAG7 >= 4) |>
+  select(-c(IRSEX, CATAG7, EDUCCAT2)) |>
+  group_by(YEAR, INCOME) |>
+  summarize(across(where(is.numeric), sum, na.rm = TRUE)) |>
+  ungroup() |>
+  mutate(
+    Nervous_1_percent = Nervous_1 / num_people,
+    Nervous_any_percent = Nervous_any / num_people,
+    Hopeless_1_percent = Hopeless_1 / num_people,
+    Hopeless_any_percent = Hopeless_any / num_people,
+    Restless_1_percent = Restless_1 / num_people,
+    Restless_any_percent = Restless_any / num_people
+  ) |>
+  pivot_longer(
+    cols = ends_with("_percent"),
+    names_to = c("Distress", "Period"),
+    names_pattern = "(.*)_(1|any)_percent",
+    values_to = "Percent"
+  ) |>
+  mutate(
+    Distress = case_when(
+      grepl("Nervous", Distress) ~ "Nervous",
+      grepl("Hopeless", Distress) ~ "Hopeless",
+      grepl("Restless", Distress) ~ "Restless"
+    ),
+    Period = recode(Period, `1` = "All the time", `any` = "Any time")
+  ) |>
+  ggplot(aes(x = YEAR, y = Percent, color = as.factor(INCOME), group = as.factor(INCOME))) +
+  geom_line(size = 1.2) +
+  facet_grid(Period ~ Distress) +
+  xlab("Year") +
+  ylab("Percentage of People in Distress") +
+  ggtitle("Psychological Distress by Income Group") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_colour_manual(name = "Income Group",
+    values = c("1" = "lightblue","2" = "orange","3" = "darkgrey","4" = "maroon"),
+    labels = c("1" = "Less than $20,000","2" = "$20,000 - $49,999","3" = "$50,000 - $74,999","4" = "$75,000 or More"))
+  
+```
 
 
+### By Age Group
+```{r fig.width=10}
+psych_summ_all_grp_ovrl |>
+  filter(CATAG7 >= 4) |>
+  select(-c(IRSEX, INCOME, EDUCCAT2)) |>
+  group_by(YEAR, CATAG7) |>
+  summarize(across(where(is.numeric), sum, na.rm = TRUE)) |>
+  ungroup() |>
+  mutate(
+    Nervous_1_percent = Nervous_1 / num_people,
+    Nervous_any_percent = Nervous_any / num_people,
+    Hopeless_1_percent = Hopeless_1 / num_people,
+    Hopeless_any_percent = Hopeless_any / num_people,
+    Restless_1_percent = Restless_1 / num_people,
+    Restless_any_percent = Restless_any / num_people
+  ) |>
+  pivot_longer(
+    cols = ends_with("_percent"),
+    names_to = c("Distress", "Period"),
+    names_pattern = "(.*)_(1|any)_percent",
+    values_to = "Percent"
+  ) |>
+  mutate(
+    Distress = case_when(
+      grepl("Nervous", Distress) ~ "Nervous",
+      grepl("Hopeless", Distress) ~ "Hopeless",
+      grepl("Restless", Distress) ~ "Restless"
+    ),
+    Period = recode(Period, `1` = "All the time", `any` = "Any time")
+  ) |>
+  ggplot(aes(x = YEAR, y = Percent, color = as.factor(CATAG7), group = as.factor(CATAG7))) +
+  geom_line(size = 1.2) +
+  facet_grid(Period ~ Distress) +
+  xlab("Year") +
+  ylab("Percentage of People in Distress") +
+  ggtitle("Psychological Distress by Age Group") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_colour_manual(name = "Age Group",
+    values = c("4" = "lightblue","5" = "orange","6" = "darkgrey","7" = "maroon"),
+    labels = c("4" = "18-20 Years Old","5" = "21-25 Years Old","6" = "26-34 Years Old","7" = ">35 Years Old"))
+  
+```
+
+
+### By Education Group
+```{r fig.width=10}
+psych_summ_all_grp_ovrl |>
+  filter(CATAG7 >= 4) |>
+  select(-c(IRSEX, INCOME, CATAG7)) |>
+  group_by(YEAR, EDUCCAT2) |>
+  summarize(across(where(is.numeric), sum, na.rm = TRUE)) |>
+  ungroup() |>
+  mutate(
+    Nervous_1_percent = Nervous_1 / num_people,
+    Nervous_any_percent = Nervous_any / num_people,
+    Hopeless_1_percent = Hopeless_1 / num_people,
+    Hopeless_any_percent = Hopeless_any / num_people,
+    Restless_1_percent = Restless_1 / num_people,
+    Restless_any_percent = Restless_any / num_people
+  ) |>
+  pivot_longer(
+    cols = ends_with("_percent"),
+    names_to = c("Distress", "Period"),
+    names_pattern = "(.*)_(1|any)_percent",
+    values_to = "Percent"
+  ) |>
+  mutate(
+    Distress = case_when(
+      grepl("Nervous", Distress) ~ "Nervous",
+      grepl("Hopeless", Distress) ~ "Hopeless",
+      grepl("Restless", Distress) ~ "Restless"
+    ),
+    Period = recode(Period, `1` = "All the time", `any` = "Any time")
+  ) |>
+  ggplot(aes(x = YEAR, y = Percent, color = as.factor(EDUCCAT2), group = as.factor(EDUCCAT2))) +
+  geom_line(size = 1.2) +
+  facet_grid(Period ~ Distress) +
+  xlab("Year") +
+  ylab("Percentage of People in Distress") +
+  ggtitle("Psychological Distress by Education Group") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_colour_manual(name = "Education Group",
+    values = c("1" = "lightblue","2" = "orange","3" = "darkgrey","4" = "maroon"),
+    labels = c("1" = "Less than high school","2" = "High School","3" = "Some college","4" = "College Graduate"))
+  
+```
