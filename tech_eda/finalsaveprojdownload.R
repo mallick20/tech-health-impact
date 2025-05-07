@@ -4,6 +4,7 @@ library(purrr)
 library(rlang)
 library(ggplot2)
 library(tidyr)
+library(scales)
 
 #----------------- Webscraping  --------------------
 
@@ -86,7 +87,7 @@ read_ntia_csvs <- function(csv_dir) {
     all_data[[data_name]] <- read.csv(csv_path)
   }
   
-  return(all_data)  # Return a named list of data frames
+  return(all_data)  # Saving a named list
 }
 ntia_datasets <- read_ntia_csvs(csv_dir = unzipped_folder)
 
@@ -140,73 +141,36 @@ if (file.exists("columns_to_select_list.txt")) {
   message("Loaded: columns_to_select_list")
 } else {
   columns_to_select_list <- list(
-    "jul11-cps" = c("hryear4","peeduca","hufaminc","peage","pesex", "pesci1","pesc2a6","pelapt","petabl", "pegame","petvba","pehome","pewrka","peschl",
-                    "peliba","peotha","peprim1","ptprim2","pepr3a2","peprim6","peprim7","peprim8","peprim9",
-                    "peprim10","peprim11","peprim12","peprm141","peprm142","peprm143","peprm144","peprm145",
-                    "peprm146", "peprm147","hesci3","pehome", "pecafe", "peelhs", "pecomm", "pelibr", "pewrka", "peschl","peperscr"
-                    ,"hesci6","hesci5"),
+    "jul11-cps" = c("hryear4","peeduca","hufaminc","peage","pesex","hesci6", "hesci5","hesci3"),
     
-    "jul13-cps" = c("hryear4","peeduca","hufaminc","prtage","pesex","hesci15","hesci11","hesci1","henet2","henet3","henet3a","henet41","henet42","henet43","henet44",
-                    "henet45","henet46","henet47","henet7a","henet6a","hesci15","hesci121","hesci122","hesci123","hesci124",
-                    "pedesk","pelapt","petabl","pecell","pegame","petvba","peprim1","peperscr",
-                    "ptprim2","peprm31","peprm32","peprm33","peprm34","peprm141","peprm142","peprm143","peprm144","peprm145",
-                    "peprm146","peprm147","peprm151","peprm153","peprm161","peprm162","peprm163","peprm164","pehome", "pecafe", "peelhs",
-                    "pecomm", "pelibr", "pewrka", "peschl","hesc2a9","hesc2a8","hesc2a7","hesc2a10","hesc2a11","hesc2a6","hesc2a5","hesc2a4","hesci124"
-                    ,"peprm35","peprm36","peprm37","peprm38","peprm39","peprm310","peprm311","peprm312","peprm313","peprm314","peprm315","peprm316","peprm317","peprim12"),
+    "jul13-cps" = c("hryear4","peeduca","hesint1","henet3","henet2","henet3a","pedesk","pelapt","petabl",
+                    "pecell","pegame","petvba","pehome", "pecafe", "peelhs", "pecomm", 
+                    "pelibr", "pewrka", "peschl","peperscr","hesci1","hesci11","henet3","henet2","peprim1","pedesk","pelapt","petabl","pecell","pegame","petvba",
+                    "pehome", "pecafe", "peelhs", "pecomm","pelibr", "pewrka", "peschl","hesci1"),
     
-    "jul15-cps" = c("hryear4","peeduca","hefaminc","prtage","pesex","helaptop", "hedesktp", "hetablet", "hemphone", "hewearab", "hetvbox",
-                    "heinhome","heinschl","heincafe","heintrav","heinlico","heinelho", "heinwork", "peinhome", "peinwork","peemail", "petextim", "petelewk", "heevrout", "peincafe", "peinschl", "peinothr",
-                    "pegames", "pevideo","pecybuly", "hecbully","peprivacy", "hepspre1","henohm1","henohm2","henohm3","henohm4","henohm5","henohm6","henohm7","henohm8","henohm9","henohm10","henohm11",
-                    "henoou1","henoou2","henoou3","henoou4","henoou5","henoou6","henoou7","henoou8","henoou9","henoou10","henoou11"),
+    "jul15-cps" = c("hryear4","peeduca","hefaminc","prtage","pesex","heinhome","heinschl","heincafe","heintrav","heinlico","heinelho", "heinwork",
+                    "helaptop", "hedesktp", "hetablet", "hemphone", "hewearab", "hetvbox"),
     
-    "nov17-cps" = c("hryear4","peeduca","hefaminc","prtage","pesex","hedesktp", "helaptop", "hetablet", "hemphone", "hewearab", "hetvbox",
-                    "heinhome","heinwork", "heinschl", "heincafe", "heintrav", "heinlico", "heinelho", "heinothr",
-                    "peemail", "petextim", "pesocial", "peconfer", "pevideo", "peaudio", "pepublish",
-                    "petelewk", "pejobsch", "peedtrai", "peusesvc",
-                    "hepspre1", "hepspre2", "hepspre3", "hepspre4", "hepspre5","hecbully", "hepscon1", "hepscon2", "hepscon3",
-                    "hehomsu", "hepsensi","henohm1","henohm2","henohm3","henohm4","henohm5","henohm6","henohm7","henohm8","henohm9","henohm10", 
-                    "heprinoh", "prnohs", "heevrout","henoou1","henoou2","henoou3","henoou4","henoou5","henoou6","henoou7","henoou8","henoou9","henoou10", "heprinoo", "noous"),
+    "nov17-cps" = c("hryear4","peeduca","hefaminc","prtage","pesex","heinhome","heinwork", "heinschl", "heincafe", "heintrav", "heinlico",
+                    "heinelho", "heinothr","helaptop", "hedesktp", "hetablet", "hemphone", "hewearab", "hetvbox"),
     
-    "nov19-cps" = c("hryear4","peeduca","hefaminc","prtage","pesex","hedesktp", "helaptop", "hetablet", "hemphone", "hewearab", "hetvbox",
-                    "heinhome", "heinwork", "heinschl", "heincafe", "heinlico", "heintrav", "heinelho", "heinothr",
-                    "peemail", "petextim", "pesocial", "peconfer", "pevideo", "peaudio", "pepublish", "petelewk", "pejobsch",
-                    "hecbully", "hepspre1", "henoou7", "henoou8"),
+    "nov19-cps" = c("hryear4","peeduca","hefaminc","prtage","pesex","heinhome","heinwork", "heinschl", "heincafe", "heintrav", "heinlico", "heinelho",
+                    "heinothr","helaptop", "hedesktp", "hetablet", "hemphone", "hewearab", "hetvbox",
+                    "peemail", "petextim", "pesocial", "peconfer", "pevideo", "peaudio", "petelewk"),
     
     "nov21-cps" = c("hryear4","peeduca","hefaminc","prtage","pesex","hedesktp","helaptop","hetablet","hemphone","hewearab","hetvbox",
-                    "heinhome", "heinwork", "heinschl", "heincafe", "heinlico", "heintrav", "heinelho", "heinothr",
-                    "peemail","petextim","pesocial","pegaming","peconfer","pevideo",
-                    "peaudio","pepublish","hehomte1","hehomte2","hehomte3","hehomte4","henetql","henetst",
-                    "hepscon1","hepscon2","hepscon3","hepscon4","hepscon5","hepscon6","hepscon7","hepscon8",
-                    "hepscyba","hedevqua","hedevsta","henetchk" ,"hemobdat"),
+                    "heinhome", "heinwork", "heinschl", "heincafe", "heinlico", "heintrav", "heinelho", "heinothr"),
     
-    "nov23-cps" = c("hryear4","peeduca","hefaminc","prtage","pesex","helaptop", "hedesktp", "hetablet", "hemphone", "hewearab", "hetvbox",
-                    "peemail", "petextim", "pesocial", "pegaming", "peconfer", "pevideo", "peaudio", "pepublish", "petelewk",
-                    "pejobsch","peedtrai","pegovts","peusesvc","peesrvcs","peecomme","peegoods","pevoicea","pehomiot","hemedrec","hemeddoc",
-                    "hepspre1","hepspre2","hepspre3","hepspre4","hepspre5",
-                    "hehomte1","hehomte2","hehomte3","hehomte4", "heinhome", "heinwork", "heinschl", "heincafe", "heinlico",
-                    "heintrav", "heinelho", "heinothr", "henetql", "henetst","henetchk",
-                    "henohm1","henohm2","henohm3","henohm4","henohm5","henohm6","henohm7","henohm8","henohm9","henohm10",
-                    "hepscon1","hepscon2","hepscon3","hepscon4","hepscon5","hepscon6","hepscon7","hepscon8",
-                    "hepscyba","heinhome","heinwork", "heinschl", "heincafe", "heintrav", "heinlico", "heinelho",
-                    "heinothr","henetchk","helaptop", "hedesktp", "hetablet", "hemphone", "hewearab", "hetvbox",
-                    "peemail", "petextim", "pesocial", "pegaming", "peconfer", "pevideo", "peaudio", "petelewk",
-                    "hehnetql","hehomte3","hehomte2","hehomte1","hehmint",
-                    "hemobdat","henetchk"),
+    "nov23-cps" = c("hryear4","peeduca","hefaminc","prtage","pesex","heinhome","heinwork", "heinschl", "heincafe", "heintrav", "heinlico", "heinelho",
+                    "heinothr","henetchk","helaptop", "hedesktp", "hetablet", "hemphone", "hewearab", "hetvbox"),
     
-    "oct03-cps" = c("hryear4","peeduca","hufaminc","prtage","pesex", "hesc1","hesint1","hesint2a","hesevr", "hesint5a","pesch","peschw","pesch2","pesch2na","prnet2","prnet3",
-                    "prnet1","pesch7","pesnetd", "pesnetb","pesneti", "pesch5","pesch6","sch5","sch6","hescon2",
-                    "hesint6","hesint6f","hescon1","hescon2"),
+    "oct03-cps" = c("hryear4","peeduca","hufaminc","prtage","pesex","hesint1","hesc1"),
     
-    "oct07-cps" = c("hryear4","peeduca","hufaminc","peage","pesex","henet1", "penet2", "henet3", "henet4"),
+    "oct07-cps" = c("hryear4","peeduca","hufaminc","peage","pesex","henet1"),
     
-    "oct09-cps" = c("hryear4","peeduca","hufaminc","peage","pesex","henet1","penet2","henet3","henet4","henet5"),
+    "oct09-cps" = c("hryear4","peeduca","hufaminc","peage","pesex","henet1"),
     
-    "sep01-cps" = c("hryear4","peeduca","hufaminc","prtage","pesex","hesc1","hesc2","hesc3","hesc4","hesint1","hesint2a","hesint41","hesint42","hesint43","hesint44",
-                    "prnet1", "prnet2","pesex", "prnet3","hescon1",
-                    "pesnetsw", "pesnetsx", "pesnetsy", "pesnetsz",
-                    "sneta", "snetb", "snetc", "snetd", "snete", "snetf", "snetg", "sneth", "sneti", "snetj", "snetk", "snetl", "snetm", "snetn", "sneto", "snetp", "snetq",
-                    "pesch", "peschw", "sch5", "sch6", "sch7",
-                    "hescon2", "hesint5a")
+    "sep01-cps" = c("hryear4","peeduca","hufaminc","prtage","pesex","hesint1","hesc1")
   )
 }
 # Select specific covariates
@@ -282,6 +246,7 @@ categorize_education <- function(df, educ_var, age_var, new_var = "educ_group") 
   return(df)
 }
 
+merged_ntia <- categorize_education(merged_ntia, "peeduca","peage")
 
 valid_vars_by_year_net <- list(
   "2001" = c("hesint1"),
@@ -335,12 +300,17 @@ summarize_by_educ_group <- function(valid_vars_by_year) {
           has_one = rowSums(select(., all_of(vars)) == 1 & select(., all_of(vars)) != -1, na.rm = TRUE) > 0
         ) %>%
         group_by(hryear4, educ_group) %>%
-        summarise(count = sum(has_one), .groups = "drop")
+        summarise(
+          tech_users = sum(has_one),
+          total_people = n(),
+          .groups = "drop"
+        )
     })
   )
   
   return(result)
 }
+
 
 
 #--------------- Function for getting technology use by particular age categories
@@ -354,22 +324,27 @@ summarize_by_age_group <- function(valid_vars_by_year) {
       if (length(vars) == 0) return(NULL)
       
       merged_ntia %>%
-        filter(hryear4 == as.integer(y), prtage %in% c(4,5,6,7)) %>%
+        filter(hryear4 == as.integer(y), prtage %in% c(4, 5,6,7)) %>%
         mutate(
           has_one = rowSums(select(., all_of(vars)) == 1 & select(., all_of(vars)) != -1, na.rm = TRUE) > 0
         ) %>%
         group_by(hryear4, prtage) %>%
-        summarise(count = sum(has_one), .groups = "drop")
+        summarise(
+          tech_users = sum(has_one),
+          total_people = n(),
+          .groups = "drop"
+        )
     })
   )
   
   return(result)
 }
 
+  
 
 #--------------- Function for getting technology use by particular gender categories
 
-summarize_by_gender_group <- function(valid_vars_by_year) {
+summarize_by_gender_group <-  function(valid_vars_by_year) {
   result <- bind_rows(
     lapply(names(valid_vars_by_year), function(y) {
       vars <- valid_vars_by_year[[y]]
@@ -378,17 +353,22 @@ summarize_by_gender_group <- function(valid_vars_by_year) {
       if (length(vars) == 0) return(NULL)
       
       merged_ntia %>%
-        filter(hryear4 == as.integer(y), pesex %in% c(1,2)) %>%
+        filter(hryear4 == as.integer(y), pesex %in% c(1, 2)) %>%
         mutate(
           has_one = rowSums(select(., all_of(vars)) == 1 & select(., all_of(vars)) != -1, na.rm = TRUE) > 0
         ) %>%
         group_by(hryear4, pesex) %>%
-        summarise(count = sum(has_one), .groups = "drop")
+        summarise(
+          tech_users = sum(has_one),
+          total_people = n(),
+          .groups = "drop"
+        )
     })
   )
   
   return(result)
 }
+
 
 
 #--------------- Function for getting technology use by particular income categories
@@ -402,17 +382,22 @@ summarize_by_income_group <- function(valid_vars_by_year) {
       if (length(vars) == 0) return(NULL)
       
       merged_ntia %>%
-        filter(hryear4 == as.integer(y), hefaminc %in% c(1,2,3,4)) %>%
+        filter(hryear4 == as.integer(y), hefaminc %in% c(1, 2, 3, 4)) %>%
         mutate(
           has_one = rowSums(select(., all_of(vars)) == 1 & select(., all_of(vars)) != -1, na.rm = TRUE) > 0
         ) %>%
         group_by(hryear4, hefaminc) %>%
-        summarise(count = sum(has_one), .groups = "drop")
+        summarise(
+          tech_users = sum(has_one),
+          total_people = n(),
+          .groups = "drop"
+        )
     })
   )
   
   return(result)
 }
+
 
 
 #--------------- Function for getting technology use by total population
@@ -430,7 +415,7 @@ summarize_tech_use_total <- function(varlist_by_year) {
         mutate(
           has_one = rowSums(select(., all_of(vars)) == 1 & select(., all_of(vars)) != -1, na.rm = TRUE) > 0
         ) %>%
-        summarise(hryear4 = first(hryear4), count = sum(has_one))
+        summarise(hryear4 = first(hryear4), tech_users = sum(has_one))
     })
   )
   
@@ -438,67 +423,67 @@ summarize_tech_use_total <- function(varlist_by_year) {
 }
 
 
-#======================== Calculating Househlds with Internet ===========================
+#======================== Calculating Households with Internet ===========================
 
-result_net_tot <- summarize_tech_use_total(valid_vars_by_year_net)
+result_users_net <- summarize_tech_use_total(valid_vars_by_year_net)
 
-ggplot(result_net_tot, aes(x = hryear4, y = count)) +
-  geom_line(size = 1.2) +
+result_users_net_plots <- ggplot(result_users_net, aes(x = hryear4, y = tech_users)) +
+  geom_line()+
   geom_point(size = 2) +
   labs(
-    title = "Count of Internet Usage (Any 1) by Year",
+    title = "Internet Usage Over The Years",
     x = "Year",
-    y = "Count"
+    y = "Number of Users"
   ) +
-  theme_minimal()
+  theme_light()
 
 
 #=========================== Calculating Internet access according to Income categories======================
 
-result_income <- summarize_by_income_group(valid_vars_by_year_net)
+result_income_net <- summarize_by_income_group(valid_vars_by_year_net)
 
-ggplot(result_income, aes(x = hryear4, y = count, color = factor(hefaminc), group = hefaminc)) +
+result_income_net_plots <- ggplot(result_income_net, aes(x = hryear4, y = tech_users, color = factor(hefaminc), group = hefaminc)) +
   geom_line(size = 1) +
   geom_point(size = 2) +
   labs(
-    title = "Count of Rows with At Least One '1' in Relevant Variables",
+    title = "Internet Usage By Income Bracket Over The Years",
     x = "Year",
-    y = "Count",
-    color = "income"
+    y = "Number of Users",
+    color = "Income"
   ) +
-  theme_minimal()
+  theme_light()
 
 
 #=========================== Calculating Internet access according to Gender categories======================
 
-result_gender <- summarize_by_gender_group(valid_vars_by_year_net)
+result_gender_net <- summarize_by_gender_group(valid_vars_by_year_net)
 
-ggplot(result_gender, aes(x = hryear4, y = count, color = factor(pesex), group = pesex)) +
+result_gender_net_plots <- ggplot(result_gender_net, aes(x = hryear4, y = tech_users, color = factor(pesex), group = pesex)) +
   geom_line(size = 1) +
   geom_point(size = 2) +
   labs(
-    title = "Count of Rows with At Least One '1' in Relevant Variables",
+    title = "Internet Usage By Gender Bracket Over The Years",
     x = "Year",
-    y = "Count",
+    y = "Number of Users",
     color = "Gender"
   ) +
-  theme_minimal()
+  theme_light()
 
 
 #=========================== Calculating Internet access according to Age categories======================
 
-result_age <- summarize_by_age_group(valid_vars_by_year_net)
+result_age_net <- summarize_by_age_group(valid_vars_by_year_net)
 
-ggplot(result_age, aes(x = hryear4, y = count, color = factor(prtage), group = prtage)) +
+result_age_net_plots <- ggplot(result_age_net, aes(x = hryear4, y = tech_users, color = factor(prtage), group = prtage)) +
   geom_line(size = 1) +
   geom_point(size = 2) +
   labs(
-    title = "Count of Rows with At Least One '1' in Relevant Variables",
+    title = "Internet Usage By Age Bracket Over The Years",
     x = "Year",
-    y = "Count",
+    y = "Number of Users",
     color = "Age"
   ) +
-  theme_minimal()
+  theme_light()
 
 
 
@@ -506,94 +491,289 @@ ggplot(result_age, aes(x = hryear4, y = count, color = factor(prtage), group = p
 
 result_education_net <- summarize_by_educ_group(valid_vars_by_year_net)
 
-ggplot(result_education_net, aes(x = hryear4, y = count, color = factor(educ_group), group = educ_group)) +
-  geom_line(size = 1) +
+result_education_net_plots <- ggplot(result_education_net, aes(x = hryear4, y = tech_users, color = factor(educ_group), group = educ_group)) +
   geom_point(size = 2) +
   labs(
-    title = "Count of Rows with At Least One '1' in Relevant Variables",
+    title = "Internet Usage By Education Qualification Bracket Over The Years",
     x = "Year",
-    y = "Count",
+    y = "Number of Users",
     color = "Education"
   ) +
-  theme_minimal()
+  theme_light()
+
 
 
 #======================= Calculating Device access to every household ===========================
 
 
-result_device_tot <- summarize_tech_use_total(valid_vars_by_year_device)
+result_users_dev <- summarize_tech_use_total(valid_vars_by_year_device)
 
-ggplot(result_device_tot, aes(x = hryear4, y = count)) +
+result_users_dev_plots <- ggplot(result_users_dev, aes(x = hryear4, y = tech_users)) +
   geom_line(size = 1.2) +
   geom_point(size = 2) +
-  labs(
-    title = "Count of Internet Usage (Any 1) by Year",
-    x = "Year",
-    y = "Count"
+  scale_x_continuous(
+    breaks = seq(min(result_users_dev$hryear4), max(result_users_dev$hryear4), by = 2)
   ) +
-  theme_minimal()
+  scale_y_continuous(
+    labels = label_number()  # No scientific notation, no commas
+  ) +
+  labs(
+    title = "Technology Usage Over The Years",
+    x = "Year",
+    y = "User Count"
+  ) +
+  theme_light(base_size = 14)
+
 
 
 #=========================== Calculating technology access according to Income categories======================
 
-result_income <- summarize_by_income_group(valid_vars_by_year_device)
+result_income_dev <- summarize_by_income_group(valid_vars_by_year_device)
 
-ggplot(result_income, aes(x = hryear4, y = count, color = factor(hefaminc), group = hefaminc)) +
+result_income_dev_plots <- ggplot(result_income_dev, aes(x = hryear4, y = tech_users, color = factor(hefaminc), group = hefaminc)) +
   geom_line(size = 1) +
   geom_point(size = 2) +
   labs(
-    title = "Count of Rows with At Least One '1' in Relevant Variables",
+    title = "Technology Usage By Income Bracket Over The Years",
     x = "Year",
-    y = "Count",
-    color = "income"
+    y = "Number of Users",
+    color = "Income"
   ) +
-  theme_minimal()
+  theme_light()
 
 
 #=========================== Calculating technology access according to Gender categories======================
 
-result_gender <- summarize_by_gender_group(valid_vars_by_year_device)
+result_gender_dev <- summarize_by_gender_group(valid_vars_by_year_device)
 
-ggplot(result_gender, aes(x = hryear4, y = count, color = factor(pesex), group = pesex)) +
+result_gender_dev_plots <- ggplot(result_gender_dev, aes(x = hryear4, y = tech_users, color = factor(pesex), group = pesex)) +
   geom_line(size = 1) +
   geom_point(size = 2) +
   labs(
-    title = "Count of Rows with At Least One '1' in Relevant Variables",
+    title = "Technology Usage By Gender Bracket Over The Years",
     x = "Year",
-    y = "Count",
+    y = "Number of Users",
     color = "Gender"
   ) +
-  theme_minimal()
+  theme_light()
 
 
 #=========================== Calculating technology access according to Age categories======================
 
-result_age <- summarize_by_age_group(valid_vars_by_year_device)
+result_age_dev <- summarize_by_age_group(valid_vars_by_year_device)
 
-ggplot(result_age, aes(x = hryear4, y = count, color = factor(prtage), group = prtage)) +
+result_age_dev_plots <- ggplot(result_age_dev, aes(x = hryear4, y = tech_users, color = factor(prtage), group = prtage)) +
   geom_line(size = 1) +
   geom_point(size = 2) +
   labs(
-    title = "Count of Rows with At Least One '1' in Relevant Variables",
+    title = "Technology Usage By Age Bracket Over The Years",
     x = "Year",
-    y = "Count",
+    y = "Number of Users",
     color = "Age"
   ) +
-  theme_minimal()
+  theme_light()
 
 
 #=========================== Calculating technology access according to Education Qualifications categories======================
 
 
-result_education <- summarize_by_educ_group("educ_group",valid_vars_by_year_device)
+result_education_dev <- summarize_by_educ_group(valid_vars_by_year_device)
 
-ggplot(result_education, aes(x = hryear4, y = count, color = factor(educ_group), group = educ_group)) +
+result_education_dev_plots <- ggplot(result_education_dev, aes(x = hryear4, y = tech_users, color = factor(educ_group), group = educ_group)) +
   geom_line(size = 1) +
   geom_point(size = 2) +
   labs(
-    title = "Count of Rows with At Least One '1' by Education Group",
+    title = "Technology Usage By  Education Qualification Bracket Over The Years",
     x = "Year",
-    y = "Count",
+    y = "Number of Users",
     color = "Education"
   ) +
+  theme_light()
+
+
+
+library(ggplot2)
+library(plotly)
+library(dplyr)
+
+# Calculate percentage
+plot_income <- result_income_net %>%
+  mutate(percent = 100 * tech_users / total_people)
+
+# Interactive plot
+p_income <- ggplot(plot_income, aes(x = hryear4, y = percent, color = factor(hefaminc))) +
+  geom_line(size = 1.2) +
+  geom_point(size = 2) +
+  labs(title = "Tech Use by Income Group",
+       x = "Year", y = "Percent", color = "Income Group") +
   theme_minimal()
+
+ggplotly(p_income)
+
+# Gender
+p_gender <- ggplot(result_gender_net %>%
+                     mutate(percent = 100 * tech_users / total_people),
+                   aes(x = hryear4, y = percent, color = factor(pesex))) +
+  geom_line(size = 1.2) + geom_point(size = 2) +
+  labs(title = "Tech Use by Gender", x = "Year", y = "Percent", color = "Gender") +
+  theme_minimal()
+
+# Age
+p_age <- ggplot(result_age_net %>%
+                  mutate(percent = 100 * tech_users / total_people),
+                aes(x = hryear4, y = percent, color = factor(prtage))) +
+  geom_line(size = 1.2) + geom_point(size = 2) +
+  labs(title = "Tech Use by Age Group", x = "Year", y = "Percent", color = "Age Group") +
+  theme_minimal()
+
+# Education
+p_education <- ggplot(result_education_net %>%
+                        mutate(percent = 100 * tech_users / total_people),
+                      aes(x = hryear4, y = percent, color = factor(educ_group))) +
+  geom_line(size = 1.2) + geom_point(size = 2) +
+  labs(title = "Tech Use by Education", x = "Year", y = "Percent", color = "Education Group") +
+  theme_minimal()
+
+ggplotly(p_income)
+ggplotly(p_gender)
+ggplotly(p_age)
+ggplotly(p_education)
+
+
+#========================merging to interact with teammates data=====================
+
+income_net <- result_income_net %>%
+  mutate(
+    category = "Income",
+    subgroup = hefaminc,
+    percent = 100 * tech_users / total_people,
+    tech_inc_u = tech_users,
+    tot_tech_inc_u = total_people
+  ) %>%
+  select(hryear4, category, subgroup,percent, tech_inc_u,tot_tech_inc_u)
+
+gender_net <- result_gender_net %>%
+  mutate(
+    category = "Gender",
+    subgroup = pesex,
+    percent = 100 * tech_users / total_people,
+    tech_gen_u = tech_users,
+    tot_tech_gen_u = total_people
+  ) %>%
+  select(hryear4, category, subgroup,percent, tech_gen_u,tot_tech_gen_u)
+
+age_net <- result_age_net %>%
+  mutate(
+    category = "Age",
+    subgroup = prtage,
+    percent = 100 * tech_users / total_people,
+    tech_age_u = tech_users,
+    tot_tech_age_u = total_people
+  ) %>%
+  select(hryear4, category, subgroup,percent, tech_age_u, tot_tech_age_u)
+
+education_net <- result_education_net %>%
+  mutate(
+    category = "Education",
+    subgroup = educ_group,
+    percent = 100 * tech_users / total_people,
+    tech_edu_u = tech_users, 
+    tot_tech_edu_u = total_people
+  ) %>%
+  select(hryear4, category, subgroup,percent, tech_edu_u, tot_tech_edu_u)
+
+# Combine them safely
+combined_results_net <- bind_rows(income_net, gender_net, age_net, education_net)
+
+wide_combined_results_net <- combined_results_net %>%
+  pivot_wider(
+    names_from = category,
+    values_from = percent
+  )
+income_dev <- result_income_dev %>%
+  mutate(
+    category = "Income",
+    subgroup = hefaminc,
+    dev_inc_u = tech_users,
+    tot_dev_inc_u = total_people,
+    percent = 100 * tech_users / total_people
+  ) %>%
+  select(hryear4, category, subgroup, percent,dev_inc_u, tot_dev_inc_u)
+
+gender_dev <- result_gender_dev %>%
+  mutate(
+    category = "Gender",
+    subgroup = pesex,
+    dev_gen_u = tech_users,
+    tot_dev_gen_u = total_people,
+    percent = 100 * tech_users / total_people
+  ) %>%
+  select(hryear4, category, subgroup, percent,dev_gen_u,tot_dev_gen_u)
+
+age_dev <- result_age_dev %>%
+  mutate(
+    category = "Age",
+    subgroup = prtage,
+    dev_age_u = tech_users,
+    tot_dev_age_u = total_people,
+    percent = 100 * tech_users / total_people
+  ) %>%
+  select(hryear4, category, subgroup, percent,dev_age_u, tot_dev_age_u)
+
+education_dev <- result_education_dev %>%
+  mutate(
+    category = "Education",
+    subgroup = educ_group,
+    dev_edu_u = tech_users,
+    tot_dev_edu_u = total_people,
+    percent = 100 * tech_users / total_people
+  ) %>%
+  select(hryear4, category, subgroup, percent,,dev_edu_u, tot_dev_edu_u)
+
+# Combine them safely
+combined_results_dev <- bind_rows(income_dev, gender_dev, age_dev, education_dev) 
+
+wide_combined_results_dev <- combined_results_dev %>%
+  pivot_wider(
+    names_from = category,
+    values_from = percent
+  )
+
+
+#========================================Saving plots===========================================
+
+plot_list <- list(result_age_net_plots, result_users_net_plots, result_education_net_plots, result_gender_net_plots,
+                  result_income_net_plots, result_age_dev_plots, result_education_dev_plots, result_gender_dev_plots,
+                  result_income_dev_plots,result_users_dev_plots )
+plot_names <- c(
+  "age_net", "users_net", "education_net", "gender_net", "income_net",
+  "age_dev", "education_dev", "gender_dev", "income_dev", "users_dev"
+)
+
+dir.create("plots", showWarnings = FALSE)
+
+for (i in seq_along(plot_list)) {
+  ggsave(
+    filename = paste0("plots/", plot_names[i], ".png"),
+    plot = plot_list[[i]],
+    width = 8, height = 6, dpi = 300
+  )
+}
+
+
+#====================================Saving Result data====================================
+result_names <- c(
+  "result_users_net","result_education_net", "result_age_net","result_gender_net","result_income_net",
+  "result_users_dev", "result_age_dev", "result_education_dev","result_gender_dev","result_income_dev",
+  "wide_combined_results_dev","wide_combined_results_net")
+
+# Create a folder if it doesn't exist
+dir.create("results", showWarnings = FALSE)
+
+# Loop and save each one to a CSV
+for (name in result_names) {
+  df <- get(name)
+  write.csv(df, file = paste0("results/", name, ".csv"), row.names = FALSE)
+}
+
+
