@@ -440,7 +440,7 @@ summarize_tech_use_total <- function(varlist_by_year) {
         mutate(
           has_one = rowSums(select(., all_of(vars)) == 1 & select(., all_of(vars)) != -1, na.rm = TRUE) > 0
         ) %>%
-        summarise(hryear4 = first(hryear4), count = sum(has_one))
+        summarise(hryear4 = first(hryear4), tech_users = sum(has_one))
     })
   )
   
@@ -451,7 +451,7 @@ summarize_tech_use_total <- function(varlist_by_year) {
 
 result_users_net <- summarize_tech_use_total(valid_vars_by_year_net)
 
-plots1 <- ggplot(result_users_net, aes(x = hryear4, y = count)) +
+plots1 <- ggplot(result_users_net, aes(x = hryear4, y = tech_users)) +
   geom_line(size = 1.2) +
   geom_point(size = 2) +
   labs(
@@ -621,10 +621,132 @@ for (i in seq_along(plot_list)) {
   )
 }
 
+#========================merging to interact with teammates data=====================
+
+income_net <- result_income_net %>%
+  mutate(
+    category = "Income",
+    subgroup = hefaminc,
+    percent = 100 * tech_users / total_people,
+    tech_inc_u = tech_users,
+    tot_tech_inc_u = total_people
+  ) %>%
+  select(hryear4, category, subgroup,percent, tech_inc_u,tot_tech_inc_u)
+
+gender_net <- result_gender_net %>%
+  mutate(
+    category = "Gender",
+    subgroup = pesex,
+    percent = 100 * tech_users / total_people,
+    tech_gen_u = tech_users,
+    tot_tech_gen_u = total_people
+  ) %>%
+  select(hryear4, category, subgroup,percent, tech_gen_u,tot_tech_gen_u)
+
+age_net <- result_age_net %>%
+  mutate(
+    category = "Age",
+    subgroup = prtage,
+    percent = 100 * tech_users / total_people,
+    tech_age_u = tech_users,
+    tot_tech_age_u = total_people
+  ) %>%
+  select(hryear4, category, subgroup,percent, tech_age_u, tot_tech_age_u)
+
+education_net <- result_education_net %>%
+  mutate(
+    category = "Education",
+    subgroup = educ_group,
+    percent = 100 * tech_users / total_people,
+    tech_edu_u = tech_users, 
+    tot_tech_edu_u = total_people
+  ) %>%
+  select(hryear4, category, subgroup,percent, tech_edu_u, tot_tech_edu_u)
+
+# Combine them safely
+combined_results_net <- bind_rows(income_net, gender_net, age_net, education_net)
+
+wide_combined_results_net <- combined_results_net %>%
+  pivot_wider(
+    names_from = category,
+    values_from = percent
+  )
+income_dev <- result_income_dev %>%
+  mutate(
+    category = "Income",
+    subgroup = hefaminc,
+    dev_inc_u = tech_users,
+    tot_dev_inc_u = total_people,
+    percent = 100 * tech_users / total_people
+  ) %>%
+  select(hryear4, category, subgroup, percent,dev_inc_u, tot_dev_inc_u)
+
+gender_dev <- result_gender_dev %>%
+  mutate(
+    category = "Gender",
+    subgroup = pesex,
+    dev_gen_u = tech_users,
+    tot_dev_gen_u = total_people,
+    percent = 100 * tech_users / total_people
+  ) %>%
+  select(hryear4, category, subgroup, percent,dev_gen_u,tot_dev_gen_u)
+
+age_dev <- result_age_dev %>%
+  mutate(
+    category = "Age",
+    subgroup = prtage,
+    dev_age_u = tech_users,
+    tot_dev_age_u = total_people,
+    percent = 100 * tech_users / total_people
+  ) %>%
+  select(hryear4, category, subgroup, percent,dev_age_u, tot_dev_age_u)
+
+education_dev <- result_education_dev %>%
+  mutate(
+    category = "Education",
+    subgroup = educ_group,
+    dev_edu_u = tech_users,
+    tot_dev_edu_u = total_people,
+    percent = 100 * tech_users / total_people
+  ) %>%
+  select(hryear4, category, subgroup, percent,,dev_edu_u, tot_dev_edu_u)
+
+# Combine them safely
+combined_results_dev <- bind_rows(income_dev, gender_dev, age_dev, education_dev) 
+
+wide_combined_results_dev <- combined_results_dev %>%
+  pivot_wider(
+    names_from = category,
+    values_from = percent
+  )
+
+
+#========================================Saving plots===========================================
+
+plot_list <- list(result_age_net_plots, result_users_net_plots, result_education_net_plots, result_gender_net_plots,
+                  result_income_net_plots, result_age_dev_plots, result_education_dev_plots, result_gender_dev_plots,
+                  result_income_dev_plots,result_users_dev_plots )
+plot_names <- c(
+  "age_net", "users_net", "education_net", "gender_net", "income_net",
+  "age_dev", "education_dev", "gender_dev", "income_dev", "users_dev"
+)
+
+dir.create("plots", showWarnings = FALSE)
+
+for (i in seq_along(plot_list)) {
+  ggsave(
+    filename = paste0("plots/", plot_names[i], ".png"),
+    plot = plot_list[[i]],
+    width = 8, height = 6, dpi = 300
+  )
+}
+
+
+#====================================Saving Result data====================================
 result_names <- c(
   "result_users_net","result_education_net", "result_age_net","result_gender_net","result_income_net",
-  "result_users_dev", "result_age_dev", "result_education_dev","result_gender_dev","result_income_dev"
-)
+  "result_users_dev", "result_age_dev", "result_education_dev","result_gender_dev","result_income_dev",
+"wide_combined_results_dev","wide_combined_results_net")
 
 # Create a folder if it doesn't exist
 dir.create("results", showWarnings = FALSE)
@@ -634,5 +756,7 @@ for (name in result_names) {
   df <- get(name)
   write.csv(df, file = paste0("results/", name, ".csv"), row.names = FALSE)
 }
+
+
 
 ```
