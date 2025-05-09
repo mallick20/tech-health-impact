@@ -100,8 +100,8 @@ pdf_text_data <- pdf_text(pdf_path)
 variables_list <- list()
 current_section <- NA
 
-# Regex patterns
-section_pattern <- "^[A-Z\\s]{4,}$"   # Lines with all CAPS indicating sections
+
+section_pattern <- "^[A-Z\\s]{4,}$"   
 variable_pattern <- "^([A-Z0-9]+)\\s+Len\\s*:\\s*\\d+\\s*(.*)$"
 
 # Loop through each page
@@ -110,9 +110,9 @@ for (page in pdf_text_data) {
   
   for (line in lines) {
     line <- str_trim(line)
-    line <- str_squish(line)   # Normalize spaces
+    line <- str_squish(line)   
     
-    # Check for section heading
+    # Checking for section heading
     if (str_detect(line, section_pattern) && nchar(line) > 3) {
       current_section <- line
     }
@@ -130,10 +130,9 @@ for (page in pdf_text_data) {
   }
 }
 
-# Combine all entries into a dataframe
 variables_df <- bind_rows(variables_list)
 
-# Remove duplicates if any
+# Remove duplicates
 variables_df <- distinct(variables_df)
 ```
 

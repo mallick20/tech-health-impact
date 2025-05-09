@@ -14,9 +14,7 @@ classoption: twoside
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 library(tidyverse)
-library(tidycensus)
 library(ggplot2)
-library(dplyr)
 ```
 
 ## Effect on Mental Health
@@ -34,16 +32,40 @@ We study mental health through the NSDUH survey which has certain indicator vari
 We start with exploring the nervousness, hopelessness and restlessness for a period of 2002-2008.
 
 ```{r, warning=FALSE, message=FALSE, echo=FALSE}
-psych_summ_ovrl <- read_csv("health_eda/variable_eda/psych_summ_ovrl.csv", show_col_types = FALSE)
-psych_summ_age_ovrl <- read_csv("health_eda/variable_eda/psych_summ_age_ovrl.csv", show_col_types = FALSE)
-psych_summ_inc_ovrl <- read_csv("health_eda/variable_eda/psych_summ_income_ovrl.csv", show_col_types = FALSE)
-psych_summ_edu_ovrl <- read_csv("health_eda/variable_eda/psych_summ_edu_ovrl.csv", show_col_types = FALSE)
+psych_summ_ovrl <- read_csv("../health_eda/variable_eda/psych_summ_ovrl.csv", show_col_types = FALSE)
+psych_summ_age_ovrl <- read_csv("../health_eda/variable_eda/psych_summ_age_ovrl.csv", show_col_types = FALSE)
+psych_summ_inc_ovrl <- read_csv("../health_eda/variable_eda/psych_summ_income_ovrl.csv", show_col_types = FALSE)
+psych_summ_edu_ovrl <- read_csv("../health_eda/variable_eda/psych_summ_edu_ovrl.csv", show_col_types = FALSE)
 ```
 
 ```{r}
 # This has each strata grouped by Gender, Age, Income and Education Level
-psych_summ_all_grp_ovrl <- read_csv("health_eda/variable_eda/psych_summ_all_grp_ovrl.csv", show_col_types = FALSE)
+psych_summ_all_grp_ovrl <- read_csv("../health_eda/variable_eda/psych_summ_all_grp_ovrl.csv", show_col_types = FALSE)
 ```
+
+
+## Data Descriptions
+
+### Number of People surveyed by gender
+```{r}
+psych_summ_all_grp_ovrl |>
+  group_by(YEAR, IRSEX) |>
+  summarize(total_people = sum(num_people, na.rm = TRUE)) |>
+  ungroup() |>
+  mutate(
+    Gender = recode(IRSEX, `1` = "Male", `2` = "Female")
+  ) |>
+  ggplot(aes(x = as.factor(YEAR), y = total_people, fill = Gender)) +
+  geom_bar(stat = "identity") +
+  xlab("Year") +
+  ylab("Number of Respondents") +
+  ggtitle("Survey Respondents by Gender and Year") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_fill_manual(values = c("Male" = "lightblue", "Female" = "orange"))
+```
+
+
 
 ## Nervousness
 
@@ -393,3 +415,119 @@ psych_summ_all_grp_ovrl |>
     labels = c("1" = "Less than high school","2" = "High School","3" = "Some college","4" = "College Graduate"))
   
 ```
+
+
+### By Gender and Age
+```{r}
+library(scales)
+```
+
+```{r fig.width=10}
+psych_summ_all_grp_ovrl |>
+  filter(CATAG7 >= 4) |>
+  select(-c(EDUCCAT2, INCOME)) |>
+  group_by(YEAR, IRSEX, CATAG7) |>
+  summarize(across(where(is.numeric), sum, na.rm = TRUE)) |>
+  ungroup() |>
+  mutate(
+    Nervous_1_percent = (Nervous_1 / num_people)
+  ) |>
+  mutate(
+    Age_Group = case_when(
+      CATAG7==4 ~ "18-20 year olds",
+      CATAG7==5 ~ "21-25 year olds",
+      CATAG7==6 ~ "26-34 year olds",
+      CATAG7==7 ~ ">35 year olds"
+    )) |>
+  ggplot(aes(x = YEAR, y = Nervous_1_percent, color = as.factor(IRSEX), group = as.factor(IRSEX))) +
+  geom_line(size = 1.2) +
+  scale_y_continuous(labels = label_percent()) +
+  facet_wrap(~Age_Group) +
+  xlab("Year") +
+  ylab("Percentage of People Nervous All Time") +
+  ggtitle("Psychological Nervousness by Gender for different Age Group") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_colour_manual(name = "Gender",
+    values = c("1" = "lightblue","2" = "orange"),
+    labels = c("1" = "MALE","2" = "FEMALE"))
+  
+```
+
+
+
+### By Gender and Income
+```{r fig.width=10}
+psych_summ_all_grp_ovrl |>
+  filter(CATAG7 >= 4) |>
+  select(-c(EDUCCAT2, CATAG7)) |>
+  group_by(YEAR, IRSEX, INCOME) |>
+  summarize(across(where(is.numeric), sum, na.rm = TRUE)) |>
+  ungroup() |>
+  mutate(
+    Nervous_1_percent = (Nervous_1 / num_people)
+  ) |>
+  mutate(
+    Income_Group = case_when(
+      INCOME==1 ~ "Less than $20,000",
+      INCOME==2 ~ "$20,000 - $49,999",
+      INCOME==3 ~ "$50,000 - $74,999",
+      INCOME==4 ~ "$75,000 or More"
+    )) |>
+  ggplot(aes(x = YEAR, y = Nervous_1_percent, color = as.factor(IRSEX), group = as.factor(IRSEX))) +
+  geom_line(size = 1.2) +
+  scale_y_continuous(labels = label_percent()) +
+  facet_wrap(~Income_Group) +
+  xlab("Year") +
+  ylab("Percentage of People Nervous All Time") +
+  ggtitle("Psychological Nervousness by Gender for different Income Group") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_colour_manual(name = "Gender",
+    values = c("1" = "lightblue","2" = "orange"),
+    labels = c("1" = "MALE","2" = "FEMALE"))
+  
+```
+
+
+
+
+
+### By Gender and Education
+```{r fig.width=10}
+psych_summ_all_grp_ovrl |>
+  filter(CATAG7 >= 4) |>
+  select(-c(CATAG7, INCOME)) |>
+  group_by(YEAR, IRSEX, EDUCCAT2) |>
+  summarize(across(where(is.numeric), sum, na.rm = TRUE)) |>
+  ungroup() |>
+  mutate(
+    Nervous_1_percent = (Nervous_1 / num_people)
+  ) |>
+  mutate(
+    Age_Group = case_when(
+      EDUCCAT2==1 ~ "High School",
+      EDUCCAT2==2 ~ "Hidh School Graduate",
+      EDUCCAT2==3 ~ "Some College",
+      EDUCCAT2==4 ~ "Some College Graduate",
+      TRUE        ~ "others"
+    )) |>
+  ggplot(aes(x = YEAR, y = Nervous_1_percent, color = as.factor(IRSEX), group = as.factor(IRSEX))) +
+  geom_line(size = 1.2) +
+  scale_y_continuous(labels = label_percent()) +
+  facet_wrap(~Age_Group) +
+  xlab("Year") +
+  ylab("Percentage of People Nervous All Time") +
+  ggtitle("Psychological Nervousness by Gender for different Education Group") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_colour_manual(name = "Gender",
+    values = c("1" = "lightblue","2" = "orange"),
+    labels = c("1" = "MALE","2" = "FEMALE"))
+  
+```
+
+
+
+
+
+
+
+

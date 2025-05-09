@@ -1,0 +1,614 @@
+---
+title: "Integrated Visualization"
+author: "Anurag Mallick, Sanjana Umesh Sawant"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library(tidyverse)
+library(ggplot2)
+library(scales)
+```
+
+
+
+## Tech Data
+
+```{r}
+tech_use_df <- read_csv("tech_eda/results/tech_use_summary.csv")
+net_use_df <- read_csv("tech_eda/results/net_use_summary.csv")
+```
+
+```{r}
+tech_net_use_df <- tech_use_df |> inner_join(net_use_df)
+```
+
+```{r}
+# get the tech use and net use
+tech_net_use_df <- tech_net_use_df |> 
+  mutate(tech_use = as.integer(avg_tech_use*n/100), 
+         net_use = as.integer(avg_net_use*n/100))
+
+
+tech_net_use_df |> head(5)
+```
+
+
+## Mental Health Data
+```{r}
+mental_health_df <- read_csv("health_eda/variable_eda/psych_summ_all_grp_ovrl.csv", show_col_types = FALSE)
+```
+
+```{r}
+mental_health_df |> head(5)
+```
+
+
+
+## Integrating on attributes
+
+In tech data, we have the attributes of gender, age and income while in health data we have education also. To merge we consider the combination of the three common demographics - gender, age and income. 
+
+
+```{r}
+mental_health_df_grp <- mental_health_df |>
+  select(-EDUCCAT2) |> 
+  group_by(YEAR, IRSEX, CATAG7, INCOME) |>
+  summarize(across(where(is.numeric), sum, na.rm = TRUE)) |> 
+  ungroup() |> 
+  rename(c(Gender=IRSEX, Age=CATAG7, Income=INCOME))
+
+tech_net_use_df <- tech_net_use_df |> 
+  rename(c(YEAR=hryear4, Gender=pesex, Age=prtage, Income=hufaminc))
+```
+
+```{r}
+mental_health_df_grp |> head(2)
+```
+
+```{r}
+tech_net_use_df |> head(2)
+```
+
+```{r}
+tech_mental_df <- tech_net_use_df |> 
+  full_join(mental_health_df_grp, by=c("YEAR", "Age", "Income", "Gender")) 
+```
+
+```{r}
+tech_mental_df |> head(5)
+```
+
+
+```{r}
+tech_mental_df |> filter(YEAR==2009)
+```
+
+
+### Storing tech_mental_data
+```{r}
+#write_csv(tech_mental_df,"final_data/final_tech_health.csv")
+```
+
+
+
+## Visualization
+
+### Getting Data
+```{r}
+tech_mental_df <- read_csv("final_data/final_tech_health.csv")
+```
+
+### Tech Users and Psych Distress in different years
+```{r fig.width=10}
+p_1 <- tech_mental_df |>
+  group_by(YEAR) |>
+  summarize(across(where(is.numeric), sum, na.rm = TRUE)) |>
+  ungroup() |>
+  na.omit() |> 
+  filter(YEAR<=2027) |> 
+  mutate(
+    net_use_percent = (net_use/ n),
+    Nervous_1_percent = (Nervous_1 / num_people)
+  ) |>
+  select(YEAR, Nervous_1_percent, net_use_percent) |> 
+  pivot_longer(
+    cols = c("Nervous_1_percent", "net_use_percent"),
+    names_to = c("Type"),
+    values_to = "Type_Value"
+  ) |> 
+  na.omit() |> 
+  ggplot(aes(x = as.factor(YEAR), y = Type_Value, color = as.factor(Type), group = as.factor(Type))) +
+  geom_line(size = 1.2) +
+  geom_point(size=2) +
+  scale_y_continuous(labels = label_percent()) +
+  xlab("Year") +
+  ylab("Percentage of People Nervous  All Time") +
+  ggtitle("Psychological Nervousness") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+ggsave("plots/p_tech_psych.png", plot = p_1, width = 10, height = 10)
+
+p_1
+```
+
+
+### Tech Users and Psych - Nervous in diff Genders
+```{r fig.width=10}
+p_2 <- tech_mental_df |>
+  group_by(YEAR, Gender) |>
+  summarize(across(where(is.numeric), sum, na.rm = TRUE)) |>
+  ungroup() |>
+  na.omit() |> 
+  filter(YEAR<=2010) |> 
+  mutate(
+    net_use_percent = (net_use/ n),
+    Nervous_1_percent = (Nervous_1 / num_people),
+    Nervous_any_percent = (Nervous_any / num_people)
+  ) |>
+  select(YEAR, Gender, Nervous_1_percent,Nervous_any_percent,  net_use_percent) |> 
+  pivot_longer(
+    cols = c("Nervous_1_percent", "Nervous_any_percent", "net_use_percent"),
+    names_to = c("Type"),
+    values_to = "Type_Value"
+  ) |> 
+  mutate(
+    Gender_Str = case_when(
+      Gender==1 ~ "MALE",
+      Gender==2 ~ "FEMALE"
+    )
+  ) |> 
+  ggplot(aes(x = as.factor(YEAR), y = Type_Value, color = as.factor(Type), group = as.factor(Type))) +
+  geom_line(size = 1.2) +
+  geom_point(size=2) +
+  facet_wrap(~Gender_Str) +
+  scale_y_continuous(labels = label_percent()) +
+  xlab("Year") +
+  ylab("% People Using Internet and Nervous ") +
+  ggtitle("Internet Use and Psychological Nervousness") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  scale_colour_manual(name = "Attribute",
+    values = c("Nervous_1_percent" = "lightblue","Nervous_any_percent" = "orange","net_use_percent" = "darkgreen"),
+    labels = c("Nervous_1_percent" = "Nervous All Time","Nervous_any_percent" = "Nervous Any Time", "net_use_percent" = "Average net use"))
+
+ggsave("plots/p_tech_nervous_gender.png", plot = p_2, width = 10, height = 10)
+
+p_2
+```
+
+
+### Tech Users and Psych - Hopeless in diff Genders
+```{r fig.width=10}
+p_3 <- tech_mental_df |>
+  group_by(YEAR, Gender) |>
+  summarize(across(where(is.numeric), sum, na.rm = TRUE)) |>
+  ungroup() |>
+  na.omit() |> 
+  filter(YEAR<=2010) |> 
+  mutate(
+    net_use_percent = (net_use/ n),
+    Hopeless_1_percent = (Hopeless_1 / num_people),
+    Hopeless_any_percent = (Hopeless_any / num_people)
+  ) |>
+  select(YEAR, Gender, Hopeless_1_percent,Hopeless_any_percent,  net_use_percent) |> 
+  pivot_longer(
+    cols = c("Hopeless_1_percent", "Hopeless_any_percent", "net_use_percent"),
+    names_to = c("Type"),
+    values_to = "Type_Value"
+  ) |> 
+  mutate(
+    Gender_Str = case_when(
+      Gender==1 ~ "MALE",
+      Gender==2 ~ "FEMALE"
+    )
+  ) |> 
+  ggplot(aes(x = as.factor(YEAR), y = Type_Value, color = as.factor(Type), group = as.factor(Type))) +
+  geom_line(size = 1.2) +
+  geom_point(size=2) +
+  facet_wrap(~Gender_Str) +
+  scale_y_continuous(labels = label_percent()) +
+  xlab("Year") +
+  ylab("% People Using Internet and Hopeless") +
+  ggtitle("Internet Use and Psychological Hopelessness") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  scale_colour_manual(name = "Attribute",
+    values = c("Hopeless_1_percent" = "lightblue","Hopeless_any_percent" = "orange","net_use_percent" = "darkgreen"),
+    labels = c("Hopeless_1_percent" = "Hopeless All Time","Hopeless_any_percent" = "Hopeless Any Time", "net_use_percent" = "Average net use"))
+
+ggsave("plots/p_tech_hopeless_gender.png", plot = p_3, width = 10, height = 10)
+
+p_3
+```
+
+
+### Tech Users and Psych - Restless in diff Genders
+```{r fig.width=10}
+p_4 <- tech_mental_df |>
+  group_by(YEAR, Gender) |>
+  summarize(across(where(is.numeric), sum, na.rm = TRUE)) |>
+  ungroup() |>
+  na.omit() |> 
+  filter(YEAR<=2010) |> 
+  mutate(
+    net_use_percent = (net_use/ n),
+    Restless_1_percent = (Restless_1 / num_people),
+    Restless_any_percent = (Restless_any / num_people)
+  ) |>
+  select(YEAR, Gender, Restless_1_percent,Restless_any_percent,  net_use_percent) |> 
+  pivot_longer(
+    cols = c("Restless_1_percent", "Restless_any_percent", "net_use_percent"),
+    names_to = c("Type"),
+    values_to = "Type_Value"
+  ) |> 
+  mutate(
+    Gender_Str = case_when(
+      Gender==1 ~ "MALE",
+      Gender==2 ~ "FEMALE"
+    )
+  ) |> 
+  ggplot(aes(x = as.factor(YEAR), y = Type_Value, color = as.factor(Type), group = as.factor(Type))) +
+  geom_line(size = 1.2) +
+  geom_point(size=2) +
+  facet_wrap(~Gender_Str) +
+  scale_y_continuous(labels = label_percent()) +
+  xlab("Year") +
+  ylab("% People Using Internet and Restless") +
+  ggtitle("Internet Use and Psychological Restlessness") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  scale_colour_manual(name = "Attribute",
+    values = c("Restless_1_percent" = "lightblue","Restless_any_percent" = "orange","net_use_percent" = "darkgreen"),
+    labels = c("Restless_1_percent" = "Restless All Time","Restless_any_percent" = "Restless Any Time", "net_use_percent" = "Average net use"))
+
+ggsave("plots/p_tech_restless_gender.png", plot = p_4, width = 10, height = 10)
+
+p_4
+
+```
+
+
+### Tech Users and Psych - Nervous in diff Genders and Age Group
+```{r fig.width=10}
+p_5 <- tech_mental_df |>
+  group_by(YEAR, Age, Gender) |>
+  summarize(across(where(is.numeric), sum, na.rm = TRUE)) |>
+  ungroup() |>
+  na.omit() |> 
+  filter(YEAR<=2010) |> 
+  mutate(
+    net_use_percent = (net_use/ n),
+    Nervous_1_percent = (Nervous_1 / num_people),
+    Nervous_any_percent = (Nervous_any / num_people)
+  ) |>
+  select(YEAR, Age, Gender, Nervous_1_percent,Nervous_any_percent,  net_use_percent) |> 
+  pivot_longer(
+    cols = c("Nervous_1_percent", "Nervous_any_percent", "net_use_percent"),
+    names_to = c("Type"),
+    values_to = "Type_Value"
+  ) |> 
+  mutate(
+    Gender_Str = case_when(
+      Gender==1 ~ "MALE",
+      Gender==2 ~ "FEMALE"
+    )
+  ) |> 
+  mutate(
+    Age_Group = case_when(
+      Age==4 ~ "18-20 year olds",
+      Age==5 ~ "21-25 year olds",
+      Age==6 ~ "26-34 year olds",
+      Age==7 ~ ">35 year olds"
+      )
+    ) |> 
+  na.omit() |> 
+  ggplot(aes(x = as.factor(YEAR), y = Type_Value, color = as.factor(Type), group = as.factor(Type))) +
+  geom_line(size = 1.2) +
+  geom_point(size=2) +
+  facet_grid(Gender_Str ~ Age_Group) +
+  scale_y_continuous(labels = label_percent()) +
+  xlab("Year") +
+  ylab("% People Using Internet and Nervous ") +
+  ggtitle("Internet Use and Psychological Nervousness by Age") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  scale_colour_manual(name = "Attribute",
+    values = c("Nervous_1_percent" = "lightblue","Nervous_any_percent" = "orange","net_use_percent" = "darkgreen"),
+    labels = c("Nervous_1_percent" = "Nervous All Time","Nervous_any_percent" = "Nervous Any Time", "net_use_percent" = "Average net use"))
+
+ggsave("plots/p_tech_nervous_gender_age.png", plot = p_5, width = 10, height = 10)
+
+p_5
+```
+
+
+### Tech Users and Psych - Hopeless in diff Genders and Age Group
+```{r fig.width=10}
+p_6 <- tech_mental_df |>
+  group_by(YEAR, Age, Gender) |>
+  summarize(across(where(is.numeric), sum, na.rm = TRUE)) |>
+  ungroup() |>
+  na.omit() |> 
+  filter(YEAR<=2010) |> 
+mutate(
+    net_use_percent = (net_use/ n),
+    Hopeless_1_percent = (Hopeless_1 / num_people),
+    Hopeless_any_percent = (Hopeless_any / num_people)
+  ) |>
+  select(YEAR,Age, Gender, Hopeless_1_percent,Hopeless_any_percent,  net_use_percent) |> 
+  pivot_longer(
+    cols = c("Hopeless_1_percent", "Hopeless_any_percent", "net_use_percent"),
+    names_to = c("Type"),
+    values_to = "Type_Value"
+  ) |> 
+  mutate(
+    Gender_Str = case_when(
+      Gender==1 ~ "MALE",
+      Gender==2 ~ "FEMALE"
+    )
+  ) |> 
+  mutate(
+    Age_Group = case_when(
+      Age==4 ~ "18-20 year olds",
+      Age==5 ~ "21-25 year olds",
+      Age==6 ~ "26-34 year olds",
+      Age==7 ~ ">35 year olds"
+      )
+    ) |> 
+  na.omit() |> 
+  ggplot(aes(x = as.factor(YEAR), y = Type_Value, color = as.factor(Type), group = as.factor(Type))) +
+  geom_line(size = 1.2) +
+  geom_point(size=2) +
+  facet_grid(Gender_Str ~ Age_Group) +
+  scale_y_continuous(labels = label_percent()) +
+  xlab("Year") +
+  ylab("% People Using Internet and Hopeless") +
+  ggtitle("Internet Use and Psychological Hopelessness by Age") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  scale_colour_manual(name = "Attribute",
+    values = c("Hopeless_1_percent" = "lightblue","Hopeless_any_percent" = "orange","net_use_percent" = "darkgreen"),
+    labels = c("Hopeless_1_percent" = "Hopeless All Time","Hopeless_any_percent" = "Hopeless Any Time", "net_use_percent" = "Average net use"))
+
+ggsave("plots/p_tech_hopeless_gender_age.png", plot = p_6, width = 10, height = 10)
+
+p_6
+
+```
+
+
+### Tech Users and Psych - Restless in diff Genders and Age Group
+```{r fig.width=10}
+p_7 <- tech_mental_df |>
+  group_by(YEAR, Age, Gender) |>
+  summarize(across(where(is.numeric), sum, na.rm = TRUE)) |>
+  ungroup() |>
+  na.omit() |> 
+  filter(YEAR<=2010) |> 
+  mutate(
+    net_use_percent = (net_use/ n),
+    Restless_1_percent = (Restless_1 / num_people),
+    Restless_any_percent = (Restless_any / num_people)
+  ) |>
+  select(YEAR, Age, Gender, Restless_1_percent,Restless_any_percent,  net_use_percent) |> 
+  pivot_longer(
+    cols = c("Restless_1_percent", "Restless_any_percent", "net_use_percent"),
+    names_to = c("Type"),
+    values_to = "Type_Value"
+  ) |> 
+  mutate(
+    Gender_Str = case_when(
+      Gender==1 ~ "MALE",
+      Gender==2 ~ "FEMALE"
+    )
+  ) |> 
+  mutate(
+    Age_Group = case_when(
+      Age==4 ~ "18-20 year olds",
+      Age==5 ~ "21-25 year olds",
+      Age==6 ~ "26-34 year olds",
+      Age==7 ~ ">35 year olds"
+      )
+    ) |> 
+  na.omit() |> 
+  ggplot(aes(x = as.factor(YEAR), y = Type_Value, color = as.factor(Type), group =
+               as.factor(Type))) +
+  geom_line(size = 1.2) +
+  geom_point(size=2) +
+  facet_grid(Gender_Str ~ Age_Group) +
+  scale_y_continuous(labels = label_percent()) +
+  xlab("Year") +
+  ylab("% People Using Internet and Restless") +
+  ggtitle("Internet Use and Psychological Restlessness by Age") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  scale_colour_manual(name = "Attribute",
+    values = c("Restless_1_percent" = "lightblue","Restless_any_percent" = "orange","net_use_percent" = "darkgreen"),
+    labels = c("Restless_1_percent" = "Restless All Time","Restless_any_percent" = "Restless Any Time", "net_use_percent" = "Average net use"))
+
+ggsave("plots/p_tech_restless_gender_age.png", plot = p_7, width = 10, height = 10)
+
+p_7
+
+```
+
+
+
+
+
+### Tech Users and Psych - Nervous in diff Genders and Income Group
+```{r fig.width=10}
+p_8 <- tech_mental_df |>
+  group_by(YEAR, Income, Gender) |>
+  summarize(across(where(is.numeric), sum, na.rm = TRUE)) |>
+  ungroup() |>
+  na.omit() |> 
+  filter(YEAR<=2010) |> 
+  mutate(
+    net_use_percent = (net_use/ n),
+    Nervous_1_percent = (Nervous_1 / num_people),
+    Nervous_any_percent = (Nervous_any / num_people)
+  ) |>
+  select(YEAR, Income, Gender, Nervous_1_percent,Nervous_any_percent,  net_use_percent) |> 
+  pivot_longer(
+    cols = c("Nervous_1_percent", "Nervous_any_percent", "net_use_percent"),
+    names_to = c("Type"),
+    values_to = "Type_Value"
+  ) |> 
+  mutate(
+    Gender_Str = case_when(
+      Gender==1 ~ "MALE",
+      Gender==2 ~ "FEMALE"
+    )
+  ) |> 
+  mutate(
+    Income_Group = case_when(
+      Income==1 ~ "Less than $20,000",
+      Income==2 ~ "$20,000 - $49,999",
+      Income==3 ~ "$50,000 - $74,999",
+      Income==4 ~ "$75,000 or More"
+      )
+    ) |> 
+  na.omit() |> 
+  ggplot(aes(x = as.factor(YEAR), y = Type_Value, color = as.factor(Type), group = as.factor(Type))) +
+  geom_line(size = 1.2) +
+  geom_point(size=2) +
+  facet_grid(Gender_Str ~ Income_Group) +
+  scale_y_continuous(labels = label_percent()) +
+  xlab("Year") +
+  ylab("% People Using Internet and Nervous ") +
+  ggtitle("Internet Use and Psychological Nervousness by Income") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  scale_colour_manual(name = "Attribute",
+    values = c("Nervous_1_percent" = "lightblue","Nervous_any_percent" = "orange","net_use_percent" = "darkgreen"),
+    labels = c("Nervous_1_percent" = "Nervous All Time","Nervous_any_percent" = "Nervous Any Time", "net_use_percent" = "Average net use"))
+
+ggsave("plots/p_tech_nervous_gender_income.png", plot = p_8, width = 10, height = 10)
+
+p_8
+```
+
+
+
+
+
+
+### Tech Users and Psych - Hopeless in diff Genders and Income Group
+```{r fig.width=10}
+p_9 <- tech_mental_df |>
+  group_by(YEAR, Income, Gender) |>
+  summarize(across(where(is.numeric), sum, na.rm = TRUE)) |>
+  ungroup() |>
+  na.omit() |> 
+  filter(YEAR<=2010) |> 
+mutate(
+    net_use_percent = (net_use/ n),
+    Hopeless_1_percent = (Hopeless_1 / num_people),
+    Hopeless_any_percent = (Hopeless_any / num_people)
+  ) |>
+  select(YEAR,Income, Gender, Hopeless_1_percent,Hopeless_any_percent,  net_use_percent) |> 
+  pivot_longer(
+    cols = c("Hopeless_1_percent", "Hopeless_any_percent", "net_use_percent"),
+    names_to = c("Type"),
+    values_to = "Type_Value"
+  ) |> 
+  mutate(
+    Gender_Str = case_when(
+      Gender==1 ~ "MALE",
+      Gender==2 ~ "FEMALE"
+    )
+  ) |> 
+  mutate(
+     Income_Group = case_when(
+      Income==1 ~ "Less than $20,000",
+      Income==2 ~ "$20,000 - $49,999",
+      Income==3 ~ "$50,000 - $74,999",
+      Income==4 ~ "$75,000 or More"
+      )
+    ) |> 
+  na.omit() |> 
+  ggplot(aes(x = as.factor(YEAR), y = Type_Value, color = as.factor(Type), group = as.factor(Type))) +
+  geom_line(size = 1.2) +
+  geom_point(size=2) +
+  facet_grid(Gender_Str ~ Income_Group) +
+  scale_y_continuous(labels = label_percent()) +
+  xlab("Year") +
+  ylab("% People Using Internet and Hopeless") +
+  ggtitle("Internet Use and Psychological Hopelessness by Income") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  scale_colour_manual(name = "Attribute",
+    values = c("Hopeless_1_percent" = "lightblue","Hopeless_any_percent" = "orange","net_use_percent" = "darkgreen"),
+    labels = c("Hopeless_1_percent" = "Hopeless All Time","Hopeless_any_percent" = "Hopeless Any Time", "net_use_percent" = "Average net use"))
+
+ggsave("plots/p_tech_hopeless_gender_income.png", plot = p_9, width = 10, height = 10)
+
+p_9
+```
+
+
+
+
+### Tech Users and Psych - Restless in diff Genders and Income Group
+```{r fig.width=10}
+p_10 <- tech_mental_df |>
+  group_by(YEAR, Income, Gender) |>
+  summarize(across(where(is.numeric), sum, na.rm = TRUE)) |>
+  ungroup() |>
+  na.omit() |> 
+  filter(YEAR<=2010) |> 
+  mutate(
+    net_use_percent = (net_use/ n),
+    Restless_1_percent = (Restless_1 / num_people),
+    Restless_any_percent = (Restless_any / num_people)
+  ) |>
+  select(YEAR, Income, Gender, Restless_1_percent,Restless_any_percent,  net_use_percent) |> 
+  pivot_longer(
+    cols = c("Restless_1_percent", "Restless_any_percent", "net_use_percent"),
+    names_to = c("Type"),
+    values_to = "Type_Value"
+  ) |> 
+  mutate(
+    Gender_Str = case_when(
+      Gender==1 ~ "MALE",
+      Gender==2 ~ "FEMALE"
+    )
+  ) |> 
+  mutate(
+    Income_Group = case_when(
+      Income==1 ~ "Less than $20,000",
+      Income==2 ~ "$20,000 - $49,999",
+      Income==3 ~ "$50,000 - $74,999",
+      Income==4 ~ "$75,000 or More"
+      )
+    )  |> 
+  na.omit() |> 
+  ggplot(aes(x = as.factor(YEAR), y = Type_Value, color = as.factor(Type), group =
+               as.factor(Type))) +
+  geom_line(size = 1.2) +
+  geom_point(size=2) +
+  facet_grid(Gender_Str ~ Income_Group) +
+  scale_y_continuous(labels = label_percent()) +
+  xlab("Year") +
+  ylab("% People Using Internet and Restless") +
+  ggtitle("Internet Use and Psychological Restlessness by Income") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  scale_colour_manual(name = "Attribute",
+    values = c("Restless_1_percent" = "lightblue","Restless_any_percent" = "orange","net_use_percent" = "darkgreen"),
+    labels = c("Restless_1_percent" = "Restless All Time","Restless_any_percent" = "Restless Any Time", "net_use_percent" = "Average net use"))
+
+
+ggsave("plots/p_tech_restless_gender_income.png", plot = p_10, width = 10, height = 10)
+
+p_10
+
+```
+
+
+
+

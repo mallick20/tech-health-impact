@@ -6,7 +6,7 @@
 library(data.table)
 
 # Define input file path
-input_file <- "../Data_Mental_health/NSDUH-2002-2019-DS0001-bndl-data-tsv/NSDUH_2002_2019_Tab.tsv"
+input_file <- "health_data/raw/NSDUH-2002-2019-DS0001-bndl-data-tsv/NSDUH_2002_2019_Tab.tsv"
 
 # Open a connection to read in chunks
 chunk_size <- 1000  # Adjust based on your system's memory
@@ -37,7 +37,7 @@ while (!finished) {
     year_data <- chunk[chunk$YEAR == yr]
     cat(yr)
     
-    output_file <- paste0("health_data/NSDUH_", yr, "_Tab.txt")
+    output_file <- paste0("../health_data/raw/NSDUH_", yr, "_Tab.txt")
     
     # If file exists, append without header
     if (file.exists(output_file)) {

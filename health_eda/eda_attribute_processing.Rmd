@@ -84,7 +84,7 @@ for (year in years) {
   cat("\nFor year", year,"\n")
   
   
-  file_name <- paste0("../health_data/NSDUH_", year, "_Tab.txt")
+  file_name <- paste0("../health_data/raw/NSDUH_", year, "_Tab.txt")
   data <- read_tsv(file_name, col_types = cols(.default = "c"))
   data <- data |> select(all_of(c("QUESTID2",all_req_vars)))
   
@@ -99,7 +99,7 @@ for (year in years) {
 
 ```{r}
 # Reading the final_data stored already
-final_data <- read_csv("../health_data/data_2002-2007.csv")
+final_data <- read_csv("../health_data/processed/data_2002-2007.csv")
 ```
 
 
@@ -114,14 +114,18 @@ final_data |> head(2)
 num_surveryed <- final_data |> group_by(YEAR) |> summarize(num_people=n()) |> ungroup()
 ```
 
-### People Surveyed by Sex
+### People Surveyed by Gender
+1 = Male
+2 = Female
+
 ```{r}
 num_surveyed_gender <- final_data |>
-  mutate(Gender = factor(IRSEX, levels = c(1, 2), labels = c("MALE", "FEMALE"))) |> 
-  group_by(YEAR, Gender) |> 
+  group_by(YEAR, IRSEX) |> 
   summarize(num_people=n()) |>
-  ungroup() |> 
-  pivot_wider(names_from = Gender, values_from = num_people, names_prefix = "Sex_")
+  ungroup()
+  
+num_surveyed_gender |> 
+  pivot_wider(names_from = IRSEX, values_from = num_people, names_prefix = "Sex_")
 ```
 
 
@@ -188,11 +192,11 @@ num_surveyed_govtprog <- final_data |> group_by(YEAR, GOVTPROG) |>
 
 We use the variable EDUCCAT2
 -9 = Data not collected for this year 
-1 = Less than high school (IREDUC2<=7 and AGE2>=7) 
-2 = High school graduate (IREDUC2=8 and AGE2>=7) 
-3 = Some college (IREDUC2=9-10 and AGE2>=7) 
-4 = College graduate (IREDUC2=11 and AGE2>=7) 
-5 = 12 to 17 year olds (AGE2<=6) 
+1 = Less than high school 
+2 = High school graduate 
+3 = Some college 
+4 = College graduate  
+5 = 12 to 17 year olds 
 
 ```{r}
 num_surveyed_edu <- final_data |> group_by(YEAR, EDUCCAT2) |> 
@@ -204,7 +208,12 @@ num_surveyed_edu |>
 ```
 
 
-
+### People Surveyed by All Levels
+```{r}
+num_surveyed_all_grp <- final_data |> group_by(YEAR, IRSEX, CATAG7, INCOME, EDUCCAT2) |>
+  summarize(num_people=n()) |> 
+  ungroup()
+```
 
 
 ## Psych Distress Variables
@@ -280,6 +289,24 @@ nervous_summ_ovrl |>
   geom_line(group=1, size=1.5)
 ```
 
+
+#### By Gender Group
+```{r, message=FALSE}
+nervous_summ_sex <- final_data |> 
+  group_by(YEAR,IRSEX, DSTNRVOS) |> 
+  summarize(num_people=n()) |> 
+  pivot_wider(names_from = DSTNRVOS, values_from = num_people, names_prefix = "Nervous_") |> 
+  ungroup()
+
+nervous_summ_sex_enc <- final_data |> 
+  group_by(YEAR,IRSEX, DSTNRVOS_enc) |> 
+  summarize(num_people=n()) |> 
+  pivot_wider(names_from = DSTNRVOS_enc, values_from = num_people, names_prefix = "Nervous_") |> 
+  ungroup()
+
+nervous_summ_sex_ovrl <- nervous_summ_sex |> left_join(nervous_summ_sex_enc, by=c("YEAR","IRSEX"))
+nervous_summ_sex_ovrl <- nervous_summ_sex_ovrl |> left_join(num_surveyed_gender, by=c("YEAR","IRSEX"))
+```
 
 
 #### By Age Group
@@ -377,7 +404,23 @@ nervous_summ_edu_ovrl <- nervous_summ_edu_ovrl |> left_join(num_surveyed_edu, by
 ```
 
 
+#### By All Demographic Groups
+```{r}
+nervous_summ_all_grp <- final_data |> 
+  group_by(YEAR, IRSEX, CATAG7, INCOME, EDUCCAT2, DSTNRVOS) |> 
+  summarize(num_people=n()) |> 
+  pivot_wider(names_from = DSTNRVOS, values_from = num_people, names_prefix = "Nervous_") |> 
+  ungroup()
 
+nervous_summ_all_grp_enc <- final_data |> 
+  group_by(YEAR, IRSEX, CATAG7, INCOME, EDUCCAT2,  DSTNRVOS_enc) |> 
+  summarize(num_people=n()) |> 
+  pivot_wider(names_from = DSTNRVOS_enc, values_from = num_people, names_prefix = "Nervous_") |> 
+  ungroup()
+
+nervous_summ_all_grp_ovrl <- nervous_summ_all_grp |> left_join(nervous_summ_all_grp_enc, by=c("YEAR","IRSEX", "CATAG7", "INCOME", "EDUCCAT2"))
+nervous_summ_all_grp_ovrl <- nervous_summ_all_grp_ovrl |> left_join(num_surveyed_all_grp, by=c("YEAR","IRSEX", "CATAG7", "INCOME", "EDUCCAT2"))
+```
 
 
 
@@ -436,6 +479,26 @@ hopeless_summ_enc <- final_data |> group_by(YEAR, DSTHOPLS_enc) |>
 
 hopeless_summ_ovrl <- hopeless_summ |> left_join(hopeless_summ_enc)
 hopeless_summ_ovrl <- hopeless_summ_ovrl |> left_join(num_surveryed) |> ungroup()
+```
+
+
+
+#### By Gender Group
+```{r, message=FALSE}
+hopeless_summ_sex <- final_data |> 
+  group_by(YEAR,IRSEX, DSTHOPLS) |> 
+  summarize(num_people=n()) |> 
+  pivot_wider(names_from = DSTHOPLS, values_from = num_people, names_prefix = "Hopeless_") |> 
+  ungroup()
+
+hopeless_summ_sex_enc <- final_data |> 
+  group_by(YEAR,IRSEX, DSTHOPLS_enc) |> 
+  summarize(num_people=n()) |> 
+  pivot_wider(names_from = DSTHOPLS_enc, values_from = num_people, names_prefix = "Hopeless_") |> 
+  ungroup()
+
+hopeless_summ_sex_ovrl <- hopeless_summ_sex |> left_join(hopeless_summ_sex_enc, by=c("YEAR","IRSEX"))
+hopeless_summ_sex_ovrl <- hopeless_summ_sex_ovrl |> left_join(num_surveyed_gender, by=c("YEAR","IRSEX"))
 ```
 
 
@@ -501,6 +564,36 @@ hopeless_summ_edu_ovrl <- hopeless_summ_edu_ovrl |> left_join(num_surveyed_edu, 
 ```
 
 
+#### By All Demographic Groups
+```{r}
+hopeless_summ_all_grp <- final_data |> 
+  group_by(YEAR, IRSEX, CATAG7, INCOME, EDUCCAT2, DSTHOPLS) |> 
+  summarize(num_people=n()) |> 
+  pivot_wider(names_from = DSTHOPLS, values_from = num_people, names_prefix = "Hopeless_") |> 
+  ungroup()
+
+hopeless_summ_all_grp_enc <- final_data |> 
+  group_by(YEAR, IRSEX, CATAG7, INCOME, EDUCCAT2,  DSTHOPLS_enc) |> 
+  summarize(num_people=n()) |> 
+  pivot_wider(names_from = DSTHOPLS_enc, values_from = num_people, names_prefix = "Hopeless_") |> 
+  ungroup()
+
+hopeless_summ_all_grp_ovrl <- hopeless_summ_all_grp |> left_join(hopeless_summ_all_grp_enc, by=c("YEAR","IRSEX", "CATAG7", "INCOME", "EDUCCAT2"))
+hopeless_summ_all_grp_ovrl <- hopeless_summ_all_grp_ovrl |> left_join(num_surveyed_all_grp, by=c("YEAR","IRSEX", "CATAG7", "INCOME", "EDUCCAT2"))
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ### DSTRSTLS - HOW OFTEN FELT restless IN WORST MONTH
 
@@ -554,6 +647,25 @@ restless_summ_ovrl <- restless_summ |> left_join(restless_summ_enc)
 restless_summ_ovrl <- restless_summ_ovrl |> left_join(num_surveryed) |> ungroup()
 ```
 
+
+
+#### By Gender Group
+```{r, message=FALSE}
+restless_summ_sex <- final_data |> 
+  group_by(YEAR,IRSEX, DSTRSTLS) |> 
+  summarize(num_people=n()) |> 
+  pivot_wider(names_from = DSTRSTLS, values_from = num_people, names_prefix = "Restless_") |> 
+  ungroup()
+
+restless_summ_sex_enc <- final_data |> 
+  group_by(YEAR,IRSEX, DSTRSTLS_enc) |> 
+  summarize(num_people=n()) |> 
+  pivot_wider(names_from = DSTRSTLS_enc, values_from = num_people, names_prefix = "Restless_") |> 
+  ungroup()
+
+restless_summ_sex_ovrl <- restless_summ_sex |> left_join(restless_summ_sex_enc, by=c("YEAR","IRSEX"))
+restless_summ_sex_ovrl <- restless_summ_sex_ovrl |> left_join(num_surveyed_gender, by=c("YEAR","IRSEX"))
+```
 
 
 #### By Age Group
@@ -617,7 +729,30 @@ restless_summ_edu_ovrl <- restless_summ_edu_ovrl |> left_join(num_surveyed_edu, 
 ```
 
 
-## Merging All Overall Attributes
+
+
+#### By All Demographic Groups
+```{r}
+restless_summ_all_grp <- final_data |> 
+  group_by(YEAR, IRSEX, CATAG7, INCOME, EDUCCAT2, DSTRSTLS) |> 
+  summarize(num_people=n()) |> 
+  pivot_wider(names_from = DSTRSTLS, values_from = num_people, names_prefix = "Restless_") |> 
+  ungroup()
+
+restless_summ_all_grp_enc <- final_data |> 
+  group_by(YEAR, IRSEX, CATAG7, INCOME, EDUCCAT2,  DSTRSTLS_enc) |> 
+  summarize(num_people=n()) |> 
+  pivot_wider(names_from = DSTRSTLS_enc, values_from = num_people, names_prefix = "Restless_") |> 
+  ungroup()
+
+restless_summ_all_grp_ovrl <- restless_summ_all_grp |> left_join(restless_summ_all_grp_enc, by=c("YEAR","IRSEX", "CATAG7", "INCOME", "EDUCCAT2"))
+restless_summ_all_grp_ovrl <- restless_summ_all_grp_ovrl |> left_join(num_surveyed_all_grp, by=c("YEAR","IRSEX", "CATAG7", "INCOME", "EDUCCAT2"))
+```
+
+
+
+
+### Merging All Overall Attributes
 
 ```{r}
 # nervous_summ_ovrl - Feeling of nervousness overall
@@ -626,32 +761,61 @@ restless_summ_edu_ovrl <- restless_summ_edu_ovrl |> left_join(num_surveyed_edu, 
 ```
 
 ```{r}
-psych_summ_ovrl <- nervous_summ_ovrl |> left_join(restless_summ_ovrl) |> left_join(hopeless_summ_ovrl)
+psych_summ_ovrl <- nervous_summ_ovrl |> 
+  left_join(restless_summ_ovrl) |> 
+  left_join(hopeless_summ_ovrl)
 
 # write_csv(psych_summ_ovrl,"variable_eda/psych_summ_ovrl.csv")
 ```
 
 
-## Merging All Age Group Attributes
+### Merging All Gender Group Attributes
 ```{r}
-psych_summ_age_ovrl <- nervous_summ_age_ovrl |> left_join(hopeless_summ_age_ovrl, by=c("YEAR", "CATAG7")) |> left_join(restless_summ_age_ovrl, by=c("YEAR", "CATAG7"))
+psych_summ_sex_ovrl <- nervous_summ_sex_ovrl |> 
+  left_join(hopeless_summ_sex_ovrl, by=c("YEAR", "IRSEX", "num_people")) |>
+  left_join(restless_summ_sex_ovrl, by=c("YEAR", "IRSEX", "num_people"))
+
+# write_csv(psych_summ_sex_ovrl,"variable_eda/psych_summ_sex_ovrl.csv")
+```
+
+
+
+### Merging All Age Group Attributes
+```{r}
+psych_summ_age_ovrl <- nervous_summ_age_ovrl |> 
+  left_join(hopeless_summ_age_ovrl, by=c("YEAR", "CATAG7", "num_people")) |>
+  left_join(restless_summ_age_ovrl, by=c("YEAR", "CATAG7", "num_people"))
 
 # write_csv(psych_summ_age_ovrl,"variable_eda/psych_summ_age_ovrl.csv")
 ```
 
 
-## Merging All Income Group Attributes
+### Merging All Income Group Attributes
 ```{r}
-psych_summ_income_ovrl <- nervous_summ_income_ovrl |> left_join(hopeless_summ_income_ovrl, by=c("YEAR", "INCOME")) |> left_join(restless_summ_income_ovrl, by=c("YEAR", "INCOME"))
+psych_summ_income_ovrl <- nervous_summ_income_ovrl |>
+  left_join(hopeless_summ_income_ovrl, by=c("YEAR", "INCOME", "num_people")) |>
+  left_join(restless_summ_income_ovrl, by=c("YEAR", "INCOME", "num_people"))
 
 # write_csv(psych_summ_income_ovrl,"variable_eda/psych_summ_income_ovrl.csv")
 ```
 
 
-## Merging All Education Group Attributes
+### Merging All Education Group Attributes
 ```{r}
-psych_summ_edu_ovrl <- nervous_summ_edu_ovrl |> left_join(hopeless_summ_edu_ovrl, by=c("YEAR", "EDUCCAT2")) |> left_join(restless_summ_edu_ovrl, by=c("YEAR", "EDUCCAT2"))
+psych_summ_edu_ovrl <- nervous_summ_edu_ovrl |> 
+  left_join(hopeless_summ_edu_ovrl, by=c("YEAR", "EDUCCAT2", "num_people")) |>left_join(restless_summ_edu_ovrl, by=c("YEAR", "EDUCCAT2", "num_people"))
 
-# write_csv(psych_summ_edu_ovrl,"variable_eda/psych_summ_edu_ovrl.csv")
+write_csv(psych_summ_edu_ovrl,"variable_eda/psych_summ_edu_ovrl.csv")
+```
+
+
+
+### Merging All DEMOGRAPHIC Group Attributes
+```{r}
+psych_summ_all_grp_ovrl <- nervous_summ_all_grp_ovrl |> 
+  left_join(hopeless_summ_all_grp_ovrl, by=c("YEAR","IRSEX", "CATAG7", "INCOME", "EDUCCAT2", "num_people")) |> 
+  left_join(restless_summ_all_grp_ovrl, by=c("YEAR","IRSEX", "CATAG7", "INCOME", "EDUCCAT2", "num_people"))
+
+write_csv(psych_summ_all_grp_ovrl,"variable_eda/psych_summ_all_grp_ovrl.csv")
 ```
 
