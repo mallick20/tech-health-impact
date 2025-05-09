@@ -22,16 +22,24 @@ We aim to merge and analyze data from both surveys to examine how different leve
 
 ## 📁 Repository Structure
 ```bash
-├───health_data
-│   ├───processed
-│   └───raw
-│       └───NSDUH-2002-2019-DS0001-bndl-data-tsv
-├───health_eda
-│   ├───variable_eda
-│   └───variable_stats
-├───health_visualization
-├───plots
-└───tech_eda
-    ├───plots
-    └───results
+.
+├── health_data
+│   ├── processed
+│   └── raw
+│       └── NSDUH-2002-2019-DS0001-bndl-data-tsv
+├── health_eda
+│   ├── codebook_processing.Rmd
+│   ├── eda_1.Rmd
+│   ├── eda_attribute_processing.Rmd
+│   ├── eda_attribute_stats.Rmd
+│   ├── variable_eda
+│   └── variable_stats
+├── health_visualization
+│   └── health_visual.Rmd
+├── plots
+├── tech_eda
+│   ├── plots
+│   ├── results
+│   └── tech_eda_101.Rmd
+└── tech_health_visual.Rmd
 ```
