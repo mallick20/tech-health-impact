@@ -5,6 +5,7 @@ library(rlang)
 library(ggplot2)
 library(tidyr)
 library(scales)
+library(plotly)
 
 #----------------- Webscraping  --------------------
 
@@ -445,11 +446,20 @@ result_income_net <- summarize_by_income_group(valid_vars_by_year_net)
 result_income_net_plots <- ggplot(result_income_net, aes(x = hryear4, y = tech_users, color = factor(hefaminc), group = hefaminc)) +
   geom_line(size = 1) +
   geom_point(size = 2) +
+  scale_color_manual(
+    values = c("1" = "#1b9e77", "2" = "#d95f02", "3" = "#7570b3", "4" = "#e7298a"),
+    labels = c(
+      "1 = Less than $20,000",
+      "2 = $20,000 - $49,999",
+      "3 = $50,000 - $74,999",
+      "4 = $75,000 or More"
+    ),
+    name = "Income Bracket"
+  ) +
   labs(
     title = "Internet Usage By Income Bracket Over The Years",
     x = "Year",
-    y = "Number of Users",
-    color = "Income"
+    y = "Number of Users"
   ) +
   theme_light()
 
@@ -461,11 +471,19 @@ result_gender_net <- summarize_by_gender_group(valid_vars_by_year_net)
 result_gender_net_plots <- ggplot(result_gender_net, aes(x = hryear4, y = tech_users, color = factor(pesex), group = pesex)) +
   geom_line(size = 1) +
   geom_point(size = 2) +
+  scale_color_manual(
+    values = c("1" = "#1b9e77", "2" = "#e7298a"),
+    labels = c(
+      "1 = Male",
+      "2 = Female"
+    ),
+    name = "Gender"
+  ) +
   labs(
     title = "Internet Usage By Gender Bracket Over The Years",
     x = "Year",
-    y = "Number of Users",
-    color = "Gender"
+    y = "Number of Users"
+
   ) +
   theme_light()
 
@@ -477,14 +495,22 @@ result_age_net <- summarize_by_age_group(valid_vars_by_year_net)
 result_age_net_plots <- ggplot(result_age_net, aes(x = hryear4, y = tech_users, color = factor(prtage), group = prtage)) +
   geom_line(size = 1) +
   geom_point(size = 2) +
+  scale_color_manual(
+    values = c("4" = "#1b9e77", "5" = "#d95f02", "6" = "#7570b3", "7" = "#e7298a"),
+    labels = c(
+      "4 = 18–20 Years Old",
+      "5 = 21–25 Years Old",
+      "6 = 26–34 Years Old",
+      "7 = 35 or Older"
+    ),
+    name = "Age Bracket"
+  ) +
   labs(
-    title = "Internet Usage By Age Bracket Over The Years",
+    title = "Technology Usage By Age Bracket Over The Years",
     x = "Year",
-    y = "Number of Users",
-    color = "Age"
+    y = "Number of Users"
   ) +
   theme_light()
-
 
 
 #=========================== Calculating Internet access according to Education categories======================
@@ -492,15 +518,25 @@ result_age_net_plots <- ggplot(result_age_net, aes(x = hryear4, y = tech_users, 
 result_education_net <- summarize_by_educ_group(valid_vars_by_year_net)
 
 result_education_net_plots <- ggplot(result_education_net, aes(x = hryear4, y = tech_users, color = factor(educ_group), group = educ_group)) +
+  geom_line(size = 1) +
   geom_point(size = 2) +
+  scale_color_manual(
+    values = c("1" = "#1b9e77", "2" = "#d95f02", "3" = "#7570b3", "4" = "#e7298a", "5" = "#66a61e"),
+    labels = c(
+      "1 = Less than high school",
+      "2 = High school graduate",
+      "3 = Some college",
+      "4 = College graduate",
+      "5 = 12 to 17 year olds"
+    ),
+    name = "Education Bracket"
+  ) +
   labs(
     title = "Internet Usage By Education Qualification Bracket Over The Years",
     x = "Year",
-    y = "Number of Users",
-    color = "Education"
+    y = "Number of Users"
   ) +
   theme_light()
-
 
 
 #======================= Calculating Device access to every household ===========================
@@ -533,11 +569,20 @@ result_income_dev <- summarize_by_income_group(valid_vars_by_year_device)
 result_income_dev_plots <- ggplot(result_income_dev, aes(x = hryear4, y = tech_users, color = factor(hefaminc), group = hefaminc)) +
   geom_line(size = 1) +
   geom_point(size = 2) +
+  scale_color_manual(
+    labels = c(
+      values = c("1" = "#1b9e77", "2" = "#d95f02", "3" = "#7570b3", "4" = "#e7298a"),
+      "1 = Less than $20,000",
+      "2 = $20,000 - $49,999",
+      "3 = $50,000 - $74,999",
+      "4 = $75,000 or More"
+    ),
+    name = "Income Bracket"
+  ) +
   labs(
-    title = "Technology Usage By Income Bracket Over The Years",
+    title = "Internet Usage By Income Bracket Over The Years",
     x = "Year",
-    y = "Number of Users",
-    color = "Income"
+    y = "Number of Users"
   ) +
   theme_light()
 
@@ -549,11 +594,19 @@ result_gender_dev <- summarize_by_gender_group(valid_vars_by_year_device)
 result_gender_dev_plots <- ggplot(result_gender_dev, aes(x = hryear4, y = tech_users, color = factor(pesex), group = pesex)) +
   geom_line(size = 1) +
   geom_point(size = 2) +
+
+  scale_color_manual(
+    values = c("1" = "#1b9e77", "2" = "#e7298a"),
+    labels = c(
+      "1 = Male",
+      "2 = Female"
+    ),
+    name = "Gender"
+  ) +
   labs(
-    title = "Technology Usage By Gender Bracket Over The Years",
+    title = "Internet Usage By Gender Bracket Over The Years",
     x = "Year",
-    y = "Number of Users",
-    color = "Gender"
+    y = "Number of Users"
   ) +
   theme_light()
 
@@ -565,11 +618,20 @@ result_age_dev <- summarize_by_age_group(valid_vars_by_year_device)
 result_age_dev_plots <- ggplot(result_age_dev, aes(x = hryear4, y = tech_users, color = factor(prtage), group = prtage)) +
   geom_line(size = 1) +
   geom_point(size = 2) +
+  scale_color_manual(
+    values = c("4" = "#1b9e77", "5" = "#d95f02", "6" = "#7570b3", "7" = "#e7298a"),
+    labels = c(
+      "4 = 18–20 Years Old",
+      "5 = 21–25 Years Old",
+      "6 = 26–34 Years Old",
+      "7 = 35 or Older"
+    ),
+    name = "Age Bracket"
+  ) +
   labs(
     title = "Technology Usage By Age Bracket Over The Years",
     x = "Year",
-    y = "Number of Users",
-    color = "Age"
+    y = "Number of Users"
   ) +
   theme_light()
 
@@ -581,23 +643,73 @@ result_education_dev <- summarize_by_educ_group(valid_vars_by_year_device)
 
 result_education_dev_plots <- ggplot(result_education_dev, aes(x = hryear4, y = tech_users, color = factor(educ_group), group = educ_group)) +
   geom_line(size = 1) +
-  geom_point(size = 2) +
+  geom_point(size = 2)+
+  scale_color_manual(
+    values = c("1" = "#1b9e77", "2" = "#d95f02", "3" = "#7570b3", "4" = "#e7298a", "5" = "#66a61e"),
+    labels = c(
+      "1 = Less than high school (IREDUC2 ≤ 7, AGE2 ≥ 7)",
+      "2 = High school graduate (IREDUC2 = 8, AGE2 ≥ 7)",
+      "3 = Some college (IREDUC2 = 9–10, AGE2 ≥ 7)",
+      "4 = College graduate (IREDUC2 = 11, AGE2 ≥ 7)",
+      "5 = 12 to 17 year olds (AGE2 ≤ 6)"
+    ),
+    name = "Education Bracket"
+  ) +
   labs(
-    title = "Technology Usage By  Education Qualification Bracket Over The Years",
+    title = "Internet Usage By Education Qualification Bracket Over The Years",
     x = "Year",
-    y = "Number of Users",
-    color = "Education"
+    y = "Number of Users"
   ) +
   theme_light()
 
-
-
-library(ggplot2)
-library(plotly)
-library(dplyr)
-
-# Calculate percentage
+# Calculating percentage plots for internet use
 plot_income <- result_income_net %>%
+  mutate(percent = 100 * tech_users / total_people)
+
+# Interactive plot
+p_income <- ggplot(plot_income, aes(x = hryear4, y = percent, color = factor(hefaminc))) +
+  geom_line(size = 1.2) +
+  geom_point(size = 2) +
+  labs(title = "Internet Use by Income Group",
+       x = "Year", y = "Percent", color = "Income Group") +
+  theme_minimal()
+
+ggplotly(p_income)
+
+# Gender
+
+p_gender <- ggplot(result_gender_net %>%
+                     mutate(percent = 100 * tech_users / total_people),
+                   aes(x = hryear4, y = percent, color = factor(pesex))) +
+  geom_line(size = 1.2) + geom_point(size = 2) +
+  labs(title = "Internet Use by Gender", x = "Year", y = "Percent", color = "Gender") +
+  theme_minimal()
+
+# Age
+
+p_age <- ggplot(result_age_net %>%
+                  mutate(percent = 100 * tech_users / total_people),
+                aes(x = hryear4, y = percent, color = factor(prtage))) +
+  geom_line(size = 1.2) + geom_point(size = 2) +
+  labs(title = "Internet Use by Age Group", x = "Year", y = "Percent", color = "Age Group") +
+  theme_minimal()
+
+# Education
+p_education <- ggplot(result_education_net %>%
+                        mutate(percent = 100 * tech_users / total_people),
+                      aes(x = hryear4, y = percent, color = factor(educ_group))) +
+  geom_line(size = 1.2) + geom_point(size = 2) +
+  labs(title = "Internet Use by Education", x = "Year", y = "Percent", color = "Education Group") +
+  theme_minimal()
+
+ggplotly(p_income)
+ggplotly(p_gender)
+ggplotly(p_age)
+ggplotly(p_education)
+
+
+# Calculating percentage plots for tech use
+plot_income <- result_income_dev %>%
   mutate(percent = 100 * tech_users / total_people)
 
 # Interactive plot
@@ -611,7 +723,8 @@ p_income <- ggplot(plot_income, aes(x = hryear4, y = percent, color = factor(hef
 ggplotly(p_income)
 
 # Gender
-p_gender <- ggplot(result_gender_net %>%
+
+p_gender <- ggplot(result_gender_dev %>%
                      mutate(percent = 100 * tech_users / total_people),
                    aes(x = hryear4, y = percent, color = factor(pesex))) +
   geom_line(size = 1.2) + geom_point(size = 2) +
@@ -619,7 +732,8 @@ p_gender <- ggplot(result_gender_net %>%
   theme_minimal()
 
 # Age
-p_age <- ggplot(result_age_net %>%
+
+p_age <- ggplot(result_age_dev %>%
                   mutate(percent = 100 * tech_users / total_people),
                 aes(x = hryear4, y = percent, color = factor(prtage))) +
   geom_line(size = 1.2) + geom_point(size = 2) +
@@ -627,7 +741,7 @@ p_age <- ggplot(result_age_net %>%
   theme_minimal()
 
 # Education
-p_education <- ggplot(result_education_net %>%
+p_education <- ggplot(result_education_dev %>%
                         mutate(percent = 100 * tech_users / total_people),
                       aes(x = hryear4, y = percent, color = factor(educ_group))) +
   geom_line(size = 1.2) + geom_point(size = 2) +
@@ -650,7 +764,7 @@ income_net <- result_income_net %>%
     tech_inc_u = tech_users,
     tot_tech_inc_u = total_people
   ) %>%
-  select(hryear4, category, subgroup,percent, tech_inc_u,tot_tech_inc_u)
+  select(hryear4, category, subgroup, percent, tech_inc_u, tot_tech_inc_u)
 
 gender_net <- result_gender_net %>%
   mutate(
@@ -728,7 +842,8 @@ education_dev <- result_education_dev %>%
     tot_dev_edu_u = total_people,
     percent = 100 * tech_users / total_people
   ) %>%
-  select(hryear4, category, subgroup, percent,,dev_edu_u, tot_dev_edu_u)
+  select(hryear4, category, subgroup, percent,dev_edu_u, tot_dev_edu_u)
+
 
 # Combine them safely
 combined_results_dev <- bind_rows(income_dev, gender_dev, age_dev, education_dev) 
@@ -739,6 +854,98 @@ wide_combined_results_dev <- combined_results_dev %>%
     values_from = percent
   )
 
+
+
+# Replace -1 with NA for relevant variables
+merged_ntia1 <- merged_ntia %>%
+  mutate(
+    pesex = ifelse(pesex == -1, NA, pesex),
+    hufaminc = ifelse(hufaminc == -1, NA, hufaminc),
+    prtage = ifelse(prtage == "-1", NA, prtage),
+    educ_group = ifelse(educ_group == "-1", NA, educ_group)
+  )
+
+merged_ntia1$has_net <- NA  # initialize
+
+for (year in names(valid_vars_by_year_net)) {
+  year_int <- as.integer(year)
+  vars <- valid_vars_by_year_net[[year]]
+  vars <- vars[vars %in% colnames(merged_ntia1)]  # only use columns that exist
+  
+  # If there are valid columns to check
+  if (length(vars) > 0) {
+    year_rows <- merged_ntia1$hryear4 == year_int
+    
+    # Subset the rows for that year
+    subset_df <- merged_ntia1[year_rows, vars, drop = FALSE]
+    
+    # Calculate has_device: 1 if any variable == 1 (and not -1), else 0
+    merged_ntia1$has_net[year_rows] <- rowSums(subset_df == 1 & subset_df != -1, na.rm = TRUE) > 0
+  }
+}
+
+# Convert TRUE/FALSE to 1/0
+merged_ntia1$has_net <- as.integer(merged_ntia1$has_net)
+
+merged_ntia1$has_device <- NA
+
+for (year in names(valid_vars_by_year_device)) {
+  year_int <- as.integer(year)
+  vars <- valid_vars_by_year_device[[year]]
+  vars <- vars[vars %in% colnames(merged_ntia1)]  # only use columns that exist
+  
+  # If there are valid columns to check
+  if (length(vars) > 0) {
+    year_rows <- merged_ntia1$hryear4 == year_int
+    
+    # Subset the rows for that year
+    subset_df <- merged_ntia1[year_rows, vars, drop = FALSE]
+    
+    # Calculate has_device: 1 if any variable == 1 (and not -1), else 0
+    merged_ntia1$has_device[year_rows] <- rowSums(subset_df == 1 & subset_df != -1, na.rm = TRUE) > 0
+  }
+}
+
+# Convert TRUE/FALSE to 1/0
+merged_ntia1$has_device <- as.integer(merged_ntia1$has_device)
+
+educated_levels <- c(1,2,3,4,5)
+
+tech_use_summary <- merged_ntia1 %>%
+  filter(
+    educ_group %in% educated_levels
+  ) %>%
+  mutate(
+    gender = case_when(
+      pesex == 1 ~ "Male",
+      pesex == 2 ~ "Female",
+      TRUE ~ NA_character_
+    )
+  ) %>%
+  group_by(hryear4,educ_group, prtage, hufaminc, pesex) %>%
+  summarise(
+    avg_tech_use = mean(has_device, na.rm = TRUE) * 100,
+    n = n(),
+    .groups = "drop"
+  )
+
+net_use_summary <- merged_ntia1 %>%
+  filter(
+    educ_group %in% educated_levels
+  ) %>%
+  mutate(
+    gender = case_when(
+      pesex == 1 ~ "Male",
+      pesex == 2 ~ "Female",
+      TRUE ~ NA_character_
+    )
+  ) %>%
+  group_by(hryear4,educ_group, prtage, hufaminc, pesex) %>%
+  summarise(
+    avg_tech_use = mean(has_device, na.rm = TRUE) * 100,
+    n = n(),
+    .groups = "drop"
+  )
 
 #========================================Saving plots===========================================
 
@@ -775,5 +982,30 @@ for (name in result_names) {
   df <- get(name)
   write.csv(df, file = paste0("results/", name, ".csv"), row.names = FALSE)
 }
+
+#============================= Something extra =============================
+
+gender_year_counts <- merged_ntia1 %>%
+  filter(pesex %in% c(1, 2)) %>%
+  mutate(
+    gender = case_when(
+      pesex == 1 ~ "Male",
+      pesex == 2 ~ "Female"
+    )
+  ) %>%
+  group_by(hryear4, gender) %>%
+  summarise(count = n(), .groups = "drop")
+
+# Plot: Stacked bar chart
+ggplot(gender_year_counts, aes(x = factor(hryear4), y = count, fill = gender)) +
+  geom_bar(stat = "identity") +
+  labs(
+    title = "Survey Respondents by Gender and Year",
+    x = "Year",
+    y = "Number of Respondents",
+    fill = "Gender"
+  ) +
+  scale_fill_manual(values = c("Female" = "orange", "Male" = "skyblue")) +
+  theme_minimal(base_size = 13)
 
 
