@@ -29,5 +29,9 @@ We aim to merge and analyze data from both surveys to examine how different leve
 ├───health_eda
 │   ├───variable_eda
 │   └───variable_stats
+├───health_visualization
+├───plots
 └───tech_eda
+    ├───plots
+    └───results
 ```
